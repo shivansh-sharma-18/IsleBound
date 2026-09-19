@@ -1,0 +1,11 @@
+body {
+    margin: 0;
+    overflow: hidden;
+}
+
+#gameCanvas {
+    display: block;
+}
+canvas {
+    cursor: url("assets/ui/crosshairs/crosshair038.png") 16 16, crosshair;
+}
