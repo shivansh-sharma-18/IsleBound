@@ -7,12 +7,7 @@ import { mouse, keys } from "./input.js";
 import { updatePlayerMovement } from "./movement.js";
 import { drawTrees, drawRocks } from "./obstacles.js";
 import { bullets, shoot, updateBullets, drawBullets } from "./weapons.js";
-import {
-  drawEnemies,
-  updateEnemies,
-  damageEnemies,
-  damagePlayer,
-} from "./enemies.js";
+import { drawEnemies,updateEnemies,damageEnemies,damagePlayer, updateEnemySpawning } from "./enemies.js";
 
 function update(dt) {
   if (player.gameOver) {
@@ -29,6 +24,8 @@ function update(dt) {
   updateBullets(dt);
 
   damageEnemies(bullets);
+
+  updateEnemySpawning(dt, player);
 
   damagePlayer(player, dt);
 

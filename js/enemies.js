@@ -1,3 +1,9 @@
+import { isWalkable } from "./collision.js";
+
+let spawnTimer = 0;
+
+const spawnInterval = 3;
+
 const enemies = [
   {
     x: 1200,
@@ -36,6 +42,43 @@ const enemies = [
 const enemyImage = new Image();
 
 enemyImage.src = "assets/enemies/zombies/zoimbie1_stand.png";
+
+function spawnEnemy(player) {
+  let x;
+  let y;
+
+  do {
+    x = Math.random() * 1800 + 500;
+    y = Math.random() * 1000 + 400;
+  } while (
+    !isWalkable(x, y, 50, 50) ||
+    Math.hypot(
+      x - player.x,
+      y - player.y
+    ) < 400
+  );
+
+  enemies.push({
+    x: x,
+    y: y,
+
+    width: 50,
+    height: 50,
+
+    speed: 100,
+    health: 100,
+  });
+}
+
+function updateEnemySpawning(dt, player) {
+  spawnTimer += dt;
+
+  if (spawnTimer >= spawnInterval) {
+    spawnEnemy(player);
+
+    spawnTimer = 0;
+  }
+}
 
 function drawEnemies(ctx, camera) {
   for (const enemy of enemies) {
@@ -91,41 +134,41 @@ function damageEnemies(bullets) {
   }
 
   for (let i = enemies.length - 1; i >= 0; i--) {
-        if (enemies[i].health <= 0) {
-            enemies.splice(i, 1);
-        }
+    if (enemies[i].health <= 0) {
+      enemies.splice(i, 1);
     }
+  }
 }
 
 function damagePlayer(player, dt) {
-    for (const enemy of enemies) {
-        const enemyCenterX =
-            enemy.x + enemy.width / 2;
+  for (const enemy of enemies) {
+    const enemyCenterX = enemy.x + enemy.width / 2;
 
-        const enemyCenterY =
-            enemy.y + enemy.height / 2;
+    const enemyCenterY = enemy.y + enemy.height / 2;
 
-        const playerCenterX =
-            player.x + player.width / 2;
+    const playerCenterX = player.x + player.width / 2;
 
-        const playerCenterY =
-            player.y + player.height / 2;
+    const playerCenterY = player.y + player.height / 2;
 
-        const dx =
-            playerCenterX - enemyCenterX;
+    const dx = playerCenterX - enemyCenterX;
 
-        const dy =
-            playerCenterY - enemyCenterY;
+    const dy = playerCenterY - enemyCenterY;
 
-        const distance = Math.hypot(dx, dy);
+    const distance = Math.hypot(dx, dy);
 
-        const attackDistance =
-            (enemy.width + player.width) / 2;
+    const attackDistance = (enemy.width + player.width) / 2;
 
-        if (distance <= attackDistance) {
-            player.health -= 20 * dt;
-        }
+    if (distance <= attackDistance) {
+      player.health -= 20 * dt;
     }
+  }
 }
 
-export { enemies, drawEnemies, updateEnemies, damageEnemies, damagePlayer };
+export {
+  enemies,
+  drawEnemies,
+  updateEnemies,
+  damageEnemies,
+  damagePlayer,
+  updateEnemySpawning,
+};
