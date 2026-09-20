@@ -3,15 +3,39 @@ import { world, TILE_SIZE, terrainMap } from "./world.js";
 import { drawTerrain } from "./terrain.js";
 import { camera, updateCamera } from "./camera.js";
 import { player, playerImage, playerGunImage } from "./player.js";
-import { mouse } from "./input.js";
+import { mouse, keys } from "./input.js";
 import { updatePlayerMovement } from "./movement.js";
 import { drawTrees, drawRocks } from "./obstacles.js";
-import { shoot, updateBullets, drawBullets } from "./weapons.js";
+import { bullets, shoot, updateBullets, drawBullets } from "./weapons.js";
+import {
+  drawEnemies,
+  updateEnemies,
+  damageEnemies,
+  damagePlayer,
+} from "./enemies.js";
 
 function update(dt) {
+  if (player.gameOver) {
+    if (keys["r"]) {
+      location.reload();
+    }
+
+    return;
+  }
   updatePlayerMovement(dt);
 
+  updateEnemies(dt, player);
+
   updateBullets(dt);
+
+  damageEnemies(bullets);
+
+  damagePlayer(player, dt);
+
+  if (player.health <= 0) {
+    player.health = 0;
+    player.gameOver = true;
+  }
 
   updateCamera(player, canvas);
 
@@ -71,6 +95,51 @@ function drawPlayer() {
   }
 }
 
+function drawHealthBar() {
+  const barWidth = 200;
+  const barHeight = 20;
+
+  const x = 20;
+  const y = 20;
+
+  const healthPercentage = player.health / player.maxHealth;
+
+  ctx.fillStyle = "#333";
+
+  ctx.fillRect(x, y, barWidth, barHeight);
+
+  ctx.fillStyle = "#e74c3c";
+
+  ctx.fillRect(x, y, barWidth * healthPercentage, barHeight);
+
+  ctx.strokeStyle = "#fff";
+
+  ctx.strokeRect(x, y, barWidth, barHeight);
+}
+
+function drawGameOver() {
+  if (!player.gameOver) {
+    return;
+  }
+
+  ctx.fillStyle = "rgba(0, 0, 0, 0.65)";
+
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+  ctx.fillStyle = "#fff";
+
+  ctx.font = "bold 60px Arial";
+  ctx.textAlign = "center";
+
+  ctx.fillText("GAME OVER", canvas.width / 2, canvas.height / 2);
+
+  ctx.font = "24px Arial";
+
+  ctx.fillText("Press R to restart", canvas.width / 2, canvas.height / 2 + 50);
+
+  ctx.textAlign = "left";
+}
+
 function draw() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
 
@@ -81,8 +150,13 @@ function draw() {
   drawBullets(ctx, camera);
   drawPlayer();
 
+  drawEnemies(ctx, camera);
+
   drawTrees(ctx, camera);
   drawRocks(ctx, camera);
+
+  drawHealthBar();
+  drawGameOver();
 }
 
 export { update, draw };

@@ -16,6 +16,11 @@ const player = {
 
     shootCooldown: 0,
     shootDelay: 0.2,
+
+    health: 100,
+    maxHealth: 100,
+
+    gameOver: false,
 };
 
 const playerImage = new Image();
