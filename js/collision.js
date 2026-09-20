@@ -2,13 +2,63 @@ import { TILE_SIZE } from "./world.js";
 import { getTerrainTile } from "./terrain.js";
 import { trees, rocks } from "./obstacles.js";
 
-function rectanglesOverlap(x1, y1, width1, height1, x2, y2, width2, height2) {
+function rectanglesOverlap(
+  x1,
+  y1,
+  width1,
+  height1,
+  x2,
+  y2,
+  width2,
+  height2,
+  padding = 0,
+) {
   return (
-    x1 < x2 + width2 &&
-    x1 + width1 > x2 &&
-    y1 < y2 + height2 &&
-    y1 + height1 > y2
+    x1 < x2 + width2 + padding &&
+    x1 + width1 > x2 - padding &&
+    y1 < y2 + height2 + padding &&
+    y1 + height1 > y2 - padding
   );
+}
+
+function isTooCloseToObstacle(x, y, width, height, padding = 30) {
+  for (const tree of trees) {
+    if (
+      rectanglesOverlap(
+        x,
+        y,
+        width,
+        height,
+        tree.x,
+        tree.y,
+        tree.width,
+        tree.height,
+        padding,
+      )
+    ) {
+      return true;
+    }
+  }
+
+  for (const rock of rocks) {
+    if (
+      rectanglesOverlap(
+        x,
+        y,
+        width,
+        height,
+        rock.x,
+        rock.y,
+        rock.width,
+        rock.height,
+        padding,
+      )
+    ) {
+      return true;
+    }
+  }
+
+  return false;
 }
 
 function isWalkable(x, y, width, height) {
@@ -78,4 +128,4 @@ function isWalkable(x, y, width, height) {
   return true;
 }
 
-export { rectanglesOverlap, isWalkable };
+export { rectanglesOverlap, isWalkable, isTooCloseToObstacle };

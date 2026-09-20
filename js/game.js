@@ -7,7 +7,9 @@ import { mouse, keys } from "./input.js";
 import { updatePlayerMovement } from "./movement.js";
 import { drawTrees, drawRocks } from "./obstacles.js";
 import { bullets, shoot, updateBullets, drawBullets } from "./weapons.js";
-import { drawEnemies,updateEnemies,damageEnemies,damagePlayer, updateEnemySpawning } from "./enemies.js";
+import { drawEnemies,updateEnemies,damageEnemies,damagePlayer, updateEnemySpawning, generateInitialEnemies } from "./enemies.js";
+import { drawResources, collectResource, getNearbyResource } from "./resources.js";
+import { inventory, addResource } from "./inventory.js";
 
 function update(dt) {
   if (player.gameOver) {
@@ -18,6 +20,17 @@ function update(dt) {
     return;
   }
   updatePlayerMovement(dt);
+
+  if (keys["e"]) {
+    const collectedResource = collectResource(player);
+
+    if (collectedResource) {
+      addResource(collectedResource, 1);
+        console.log("Collected:", collectedResource);
+    }
+
+    keys["e"] = false;
+}
 
   updateEnemies(dt, player);
 
@@ -137,6 +150,75 @@ function drawGameOver() {
   ctx.textAlign = "left";
 }
 
+function drawInventory() {
+    const x = 20;
+    const y = 55;
+
+    ctx.fillStyle = "rgba(0, 0, 0, 0.6)";
+    ctx.fillRect(x, y, 180, 70);
+
+    ctx.fillStyle = "#fff";
+    ctx.font = "18px Arial";
+
+    ctx.fillText(
+        `Wood: ${inventory.wood}`,
+        x + 15,
+        y + 25
+    );
+
+    ctx.fillText(
+        `Stone: ${inventory.stone}`,
+        x + 15,
+        y + 50
+    );
+}
+
+function drawInteractionPrompt() {
+    const resource = getNearbyResource(player);
+
+    if (!resource) {
+        return;
+    }
+
+    let resourceName = "";
+
+    if (resource.type === "wood") {
+        resourceName = "Wood";
+    }
+
+    if (resource.type === "stone") {
+        resourceName = "Stone";
+    }
+
+    const text = `Press E to gather ${resourceName}`;
+
+    ctx.font = "18px Arial";
+
+    const textWidth = ctx.measureText(text).width;
+
+    const boxWidth = textWidth + 30;
+    const boxHeight = 40;
+
+    const x = (canvas.width - boxWidth) / 2;
+    const y = canvas.height - 80;
+
+    ctx.fillStyle = "rgba(0, 0, 0, 0.75)";
+    ctx.fillRect(x, y, boxWidth, boxHeight);
+
+    ctx.fillStyle = "#ffffff";
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+
+    ctx.fillText(
+        text,
+        canvas.width / 2,
+        y + boxHeight / 2
+    );
+
+    ctx.textAlign = "left";
+    ctx.textBaseline = "alphabetic";
+}
+
 function draw() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
 
@@ -152,8 +234,14 @@ function draw() {
   drawTrees(ctx, camera);
   drawRocks(ctx, camera);
 
+  drawResources(ctx, camera);
+
   drawHealthBar();
+  drawInventory();
+  drawInteractionPrompt();
   drawGameOver();
 }
+
+generateInitialEnemies(player);
 
 export { update, draw };

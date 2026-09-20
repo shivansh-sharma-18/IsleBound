@@ -1,73 +1,56 @@
-import { isWalkable } from "./collision.js";
+import { isWalkable, isTooCloseToObstacle } from "./collision.js";
 
 let spawnTimer = 0;
 
 const spawnInterval = 3;
 
-const enemies = [
-  {
-    x: 1200,
-    y: 600,
-
-    width: 50,
-    height: 50,
-
-    speed: 100,
-    health: 100,
-  },
-
-  {
-    x: 1500,
-    y: 900,
-
-    width: 50,
-    height: 50,
-
-    speed: 100,
-    health: 100,
-  },
-
-  {
-    x: 1000,
-    y: 1300,
-
-    width: 50,
-    height: 50,
-
-    speed: 100,
-    health: 100,
-  },
-];
+const enemies = [];
 
 const enemyImage = new Image();
 
 enemyImage.src = "assets/enemies/zombies/zoimbie1_stand.png";
 
 function spawnEnemy(player) {
-  let x;
-  let y;
+  const enemyWidth = 50;
+  const enemyHeight = 50;
 
-  do {
-    x = Math.random() * 1800 + 500;
-    y = Math.random() * 1000 + 400;
-  } while (
-    !isWalkable(x, y, 50, 50) ||
-    Math.hypot(
-      x - player.x,
-      y - player.y
-    ) < 400
-  );
+  for (let attempt = 0; attempt < 1000; attempt++) {
+    const x = Math.random() * 1800 + 500;
 
-  enemies.push({
-    x: x,
-    y: y,
+    const y = Math.random() * 1000 + 400;
 
-    width: 50,
-    height: 50,
+    const distance = Math.hypot(x - player.x, y - player.y);
 
-    speed: 100,
-    health: 100,
-  });
+    if (distance < 400) {
+      continue;
+    }
+
+    if (!isWalkable(x, y, enemyWidth, enemyHeight)) {
+      continue;
+    }
+
+    if (isTooCloseToObstacle(x, y, enemyWidth, enemyHeight)) {
+      continue;
+    }
+
+    enemies.push({
+      x: x,
+      y: y,
+      width: enemyWidth,
+      height: enemyHeight,
+      speed: 100,
+      health: 100,
+    });
+
+    return;
+  }
+
+}
+
+function generateInitialEnemies(player) {
+  for (let i = 0; i < 3; i++) {
+    spawnEnemy(player);
+  }
 }
 
 function updateEnemySpawning(dt, player) {
@@ -83,6 +66,7 @@ function updateEnemySpawning(dt, player) {
 function drawEnemies(ctx, camera) {
   for (const enemy of enemies) {
     const screenX = enemy.x - camera.x;
+
     const screenY = enemy.y - camera.y;
 
     if (enemyImage.complete && enemyImage.naturalWidth > 0) {
@@ -171,4 +155,5 @@ export {
   damageEnemies,
   damagePlayer,
   updateEnemySpawning,
+  generateInitialEnemies,
 };
