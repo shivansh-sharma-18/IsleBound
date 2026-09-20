@@ -5,7 +5,7 @@ function gameLoop(timestamp, update, draw) {
         lastTime = timestamp;
     }
 
-    const dt = (timestamp - lastTime) / 1000;
+    let dt = (timestamp - lastTime) / 1000;
 
     lastTime = timestamp;
 
