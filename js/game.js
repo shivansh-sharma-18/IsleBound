@@ -6,11 +6,13 @@ import { player, playerImage, playerGunImage } from "./player.js";
 import { mouse } from "./input.js";
 import { updatePlayerMovement } from "./movement.js";
 import { drawTrees, drawRocks } from "./obstacles.js";
+import { shoot, updateBullets, drawBullets } from "./weapons.js";
 
 function update(dt) {
-
   updatePlayerMovement(dt);
-  
+
+  updateBullets(dt);
+
   updateCamera(player, canvas);
 
   const mouseWorldX = mouse.x + camera.x;
@@ -24,6 +26,16 @@ function update(dt) {
     mouseWorldY - playerCenterY,
     mouseWorldX - playerCenterX,
   );
+
+  if (player.shootCooldown > 0) {
+    player.shootCooldown -= dt;
+  }
+
+  if (mouse.leftButtonDown && player.shootCooldown <= 0) {
+    shoot(player, mouseWorldX, mouseWorldY);
+
+    player.shootCooldown = player.shootDelay;
+  }
 }
 
 function drawPlayer() {
@@ -66,7 +78,9 @@ function draw() {
   ctx.fillRect(0, 0, canvas.width, canvas.height);
 
   drawTerrain(ctx, canvas, camera);
+  drawBullets(ctx, camera);
   drawPlayer();
+
   drawTrees(ctx, camera);
   drawRocks(ctx, camera);
 }
