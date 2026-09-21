@@ -9,8 +9,27 @@ const boat = {
   crafted: false,
 };
 
+const BOAT_INTERACTION_RANGE = 100;
+
 function craftBoat() {
   boat.crafted = true;
+}
+
+function isNearBoat(player) {
+  if (!boat.crafted) return false;
+
+  const boatCenterX = boat.x + boat.width / 2;
+  const boatCenterY = boat.y + boat.height / 2;
+
+  const playerCenterX = player.x + player.width / 2;
+  const playerCenterY = player.y + player.height / 2;
+
+  const distance = Math.hypot(
+    playerCenterX - boatCenterX,
+    playerCenterY - boatCenterY,
+  );
+
+  return distance <= BOAT_INTERACTION_RANGE;
 }
 
 function drawBoat(ctx, camera) {
@@ -56,4 +75,4 @@ function drawBoat(ctx, camera) {
   ctx.restore();
 }
 
-export { boat, craftBoat, drawBoat };
+export { boat, craftBoat, drawBoat, isNearBoat };

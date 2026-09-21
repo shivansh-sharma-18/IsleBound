@@ -20,11 +20,23 @@ import {
 } from "./resources.js";
 import { inventory, addResource } from "./inventory.js";
 import { recipes, craft } from "./crafting.js";
-import { craftBoat, drawBoat } from "./boat.js";
+import { craftBoat, drawBoat, isNearBoat } from "./boat.js";
+import {
+  islandCompleted,
+  completeIsland,
+  drawIslandComplete,
+} from "./islandComplete.js";
 
 let craftingOpen = false;
 
 function update(dt) {
+  if (islandCompleted) {
+    if (keys["r"]) {
+      location.reload();
+    }
+    return;
+  }
+
   if (player.gameOver) {
     if (keys["r"]) {
       location.reload();
@@ -41,9 +53,13 @@ function update(dt) {
   updateResources(dt);
 
   if (keys["e"]) {
-    const collectedResource = collectResource(player);
-    if (collectedResource) {
-      addResource(collectedResource.type, collectedResource.amount);
+    if (isNearBoat(player)) {
+      completeIsland();
+    } else {
+      const collectedResource = collectResource(player);
+      if (collectedResource) {
+        addResource(collectedResource.type, collectedResource.amount);
+      }
     }
     keys["e"] = false;
   }
@@ -117,6 +133,7 @@ function update(dt) {
 function drawPlayer() {
   const screenX = player.x - camera.x;
   const screenY = player.y - camera.y;
+
   const currentImage = player.weapon === "gun" ? playerGunImage : playerImage;
 
   if (currentImage.complete && currentImage.naturalWidth > 0) {
@@ -187,6 +204,8 @@ function drawInventory() {
 }
 
 function drawInteractionPrompt() {
+  if (isNearBoat(player)) return;
+
   const resource = getNearbyResource(player);
   if (!resource) return;
 
@@ -195,6 +214,30 @@ function drawInteractionPrompt() {
   if (resource.type === "stone") resourceName = "Stone";
 
   const text = `Press E to gather ${resourceName} (+${resource.amount})`;
+
+  ctx.font = "18px Arial";
+  const textWidth = ctx.measureText(text).width;
+  const boxWidth = textWidth + 30;
+  const boxHeight = 40;
+  const x = (canvas.width - boxWidth) / 2;
+  const y = canvas.height - 80;
+
+  ctx.fillStyle = "rgba(0, 0, 0, 0.75)";
+  ctx.fillRect(x, y, boxWidth, boxHeight);
+
+  ctx.fillStyle = "#ffffff";
+  ctx.textAlign = "center";
+  ctx.textBaseline = "middle";
+  ctx.fillText(text, canvas.width / 2, y + boxHeight / 2);
+
+  ctx.textAlign = "left";
+  ctx.textBaseline = "alphabetic";
+}
+
+function drawBoatInteractionPrompt() {
+  if (!isNearBoat(player)) return;
+
+  const text = "Press E to use boat";
 
   ctx.font = "18px Arial";
   const textWidth = ctx.measureText(text).width;
@@ -281,11 +324,15 @@ function draw() {
   drawTrees(ctx, camera);
   drawRocks(ctx, camera);
   drawResources(ctx, camera);
+
   drawHealthBar();
   drawInventory();
   drawCraftingMenu();
   drawInteractionPrompt();
+  drawBoatInteractionPrompt();
+
   drawGameOver();
+  drawIslandComplete(ctx, canvas);
 }
 
 generateInitialEnemies(player);
