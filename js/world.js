@@ -14,18 +14,24 @@ function generateTerrainMap() {
   const centerX = columns / 2;
   const centerY = rows / 2;
 
-  const islandRadius = 25;
-  const sandWidth = 4;
+  const islandRadiusX = 28;
+  const islandRadiusY = 18;
+
+  const sandWidth = 0.1;
 
   for (let row = 0; row < rows; row++) {
     const terrainRow = [];
 
     for (let col = 0; col < columns; col++) {
-      const distance = Math.sqrt((col - centerX) ** 2 + (row - centerY) ** 2);
+      const normalizedX = (col - centerX) / islandRadiusX;
 
-      if (distance > islandRadius) {
+      const normalizedY = (row - centerY) / islandRadiusY;
+
+      const distance = Math.sqrt(normalizedX ** 2 + normalizedY ** 2);
+
+      if (distance > 1) {
         terrainRow.push("W");
-      } else if (distance > islandRadius - sandWidth) {
+      } else if (distance > 1 - sandWidth) {
         terrainRow.push("S");
       } else {
         terrainRow.push("G");
