@@ -4,6 +4,7 @@ const mouse = {
     x: canvas.width / 2,
     y: canvas.height / 2,
     leftButtonDown: false,
+    clicked: false
 }
 
 canvas.addEventListener("mousemove", function (event) {
@@ -16,6 +17,7 @@ canvas.addEventListener("mousemove", function (event) {
 canvas.addEventListener("mousedown", function (event) {
     if (event.button === 0) {
         mouse.leftButtonDown = true;
+        mouse.clicked = true;
     }
 });
 
