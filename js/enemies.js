@@ -5,7 +5,7 @@ const ENEMY_TYPES = {
     hp: 40,
     speed: 95,
     detectionRange: 220,
-    attackRange: 46,
+    attackRange: 55,
     attackCooldown: 1.1,
     damage: 8,
     radius: 15,
@@ -14,7 +14,7 @@ const ENEMY_TYPES = {
     hp: 60,
     speed: 125,
     detectionRange: 250,
-    attackRange: 42,
+    attackRange: 50,
     attackCooldown: 0.8,
     damage: 12,
     radius: 16,
@@ -23,7 +23,7 @@ const ENEMY_TYPES = {
     hp: 420,
     speed: 90,
     detectionRange: 520,
-    attackRange: 70,
+    attackRange: 80,
     attackCooldown: 1.3,
     damage: 22,
     radius: 34,
@@ -43,6 +43,12 @@ const enemies = [];
 
 const ENEMY_WIDTH = 50;
 const ENEMY_HEIGHT = 50;
+
+const ATTACK_DURATION = 0.25;
+const ATTACK_LUNGE_DISTANCE = 18;
+const ATTACK_SCALE = 1.15;
+
+let playerHitFlash = 0;
 
 const INITIAL_ENEMY_COUNTS = {
   pirate: 6,
@@ -79,6 +85,12 @@ function makeEnemy(type, x, y) {
     kx: 0,
     ky: 0,
     hitFlash: 0,
+    attackTimer: 0,
+    attackHitApplied: false,
+    attackStartX: 0,
+    attackStartY: 0,
+    attackTargetX: 0,
+    attackTargetY: 0,
   };
 }
 
@@ -86,19 +98,12 @@ function spawnEnemy(player, type = null) {
   for (let attempt = 0; attempt < 1000; attempt++) {
     const x = Math.random() * 1800 + 500;
     const y = Math.random() * 1000 + 400;
+
     const distance = Math.hypot(x - player.x, y - player.y);
 
-    if (distance < 400) {
-      continue;
-    }
-
-    if (!isWalkable(x, y, ENEMY_WIDTH, ENEMY_HEIGHT)) {
-      continue;
-    }
-
-    if (isTooCloseToObstacle(x, y, ENEMY_WIDTH, ENEMY_HEIGHT)) {
-      continue;
-    }
+    if (distance < 400) continue;
+    if (!isWalkable(x, y, ENEMY_WIDTH, ENEMY_HEIGHT)) continue;
+    if (isTooCloseToObstacle(x, y, ENEMY_WIDTH, ENEMY_HEIGHT)) continue;
 
     let enemyType = type;
 
@@ -131,6 +136,7 @@ function attackPlayer(enemy, player) {
   }
 
   player.health -= enemy.damage;
+  playerHitFlash = 0.18;
 
   const enemyCenterX = enemy.x + enemy.width / 2;
   const enemyCenterY = enemy.y + enemy.height / 2;
@@ -159,11 +165,54 @@ function attackPlayer(enemy, player) {
   }
 }
 
+function startEnemyAttack(enemy, player) {
+  enemy.state = "attack";
+  enemy.attackTimer = 0;
+  enemy.attackHitApplied = false;
+  enemy.attackStartX = enemy.x;
+  enemy.attackStartY = enemy.y;
+
+  const playerCenterX = player.x + player.width / 2;
+  const playerCenterY = player.y + player.height / 2;
+  const enemyCenterX = enemy.x + enemy.width / 2;
+  const enemyCenterY = enemy.y + enemy.height / 2;
+
+  const angle = Math.atan2(
+    playerCenterY - enemyCenterY,
+    playerCenterX - enemyCenterX,
+  );
+
+  enemy.attackTargetX = Math.cos(angle) * ATTACK_LUNGE_DISTANCE;
+  enemy.attackTargetY = Math.sin(angle) * ATTACK_LUNGE_DISTANCE;
+  enemy.facing = angle;
+}
+
+function updateEnemyAttack(enemy, player, dt) {
+  enemy.attackTimer += dt;
+
+  if (!enemy.attackHitApplied && enemy.attackTimer >= ATTACK_DURATION / 2) {
+    attackPlayer(enemy, player);
+    enemy.attackHitApplied = true;
+  }
+
+  if (enemy.attackTimer >= ATTACK_DURATION) {
+    enemy.attackTimer = 0;
+    enemy.attackHitApplied = false;
+    enemy.state = "chase";
+    enemy.cdTimer = enemy.attackCooldown;
+  }
+}
+
 function updateEnemies(dt, player) {
-  for (const enemy of enemies) {
-    if (!enemy.alive) {
-      continue;
+  if (playerHitFlash > 0) {
+    playerHitFlash -= dt;
+    if (playerHitFlash < 0) {
+      playerHitFlash = 0;
     }
+  }
+
+  for (const enemy of enemies) {
+    if (!enemy.alive) continue;
 
     if (Math.abs(enemy.kx) > 1 || Math.abs(enemy.ky) > 1) {
       const nextX = enemy.x + enemy.kx * dt;
@@ -189,6 +238,11 @@ function updateEnemies(dt, player) {
       enemy.hitFlash -= dt;
     }
 
+    if (enemy.state === "attack") {
+      updateEnemyAttack(enemy, player, dt);
+      continue;
+    }
+
     const enemyCenterX = enemy.x + enemy.width / 2;
     const enemyCenterY = enemy.y + enemy.height / 2;
     const playerCenterX = player.x + player.width / 2;
@@ -205,31 +259,29 @@ function updateEnemies(dt, player) {
     }
 
     if (enemy.state === "chase") {
-      if (distance > enemy.attackRange * 0.85) {
-        if (distance === 0) {
-          continue;
-        }
-
-        const angle = Math.atan2(dy, dx);
-        enemy.facing = angle;
-
-        const moveX = Math.cos(angle) * enemy.speed * dt;
-        const moveY = Math.sin(angle) * enemy.speed * dt;
-
-        if (isWalkable(enemy.x + moveX, enemy.y, enemy.width, enemy.height)) {
-          enemy.x += moveX;
-        }
-
-        if (isWalkable(enemy.x, enemy.y + moveY, enemy.width, enemy.height)) {
-          enemy.y += moveY;
-        }
-      } else {
+      if (distance <= enemy.attackRange) {
         enemy.facing = Math.atan2(dy, dx);
 
         if (enemy.cdTimer <= 0) {
-          attackPlayer(enemy, player);
-          enemy.cdTimer = enemy.attackCooldown;
+          startEnemyAttack(enemy, player);
         }
+        continue;
+      }
+
+      if (distance === 0) continue;
+
+      const angle = Math.atan2(dy, dx);
+      enemy.facing = angle;
+
+      const moveX = Math.cos(angle) * enemy.speed * dt;
+      const moveY = Math.sin(angle) * enemy.speed * dt;
+
+      if (isWalkable(enemy.x + moveX, enemy.y, enemy.width, enemy.height)) {
+        enemy.x += moveX;
+      }
+
+      if (isWalkable(enemy.x, enemy.y + moveY, enemy.width, enemy.height)) {
+        enemy.y += moveY;
       }
     }
   }
@@ -237,9 +289,7 @@ function updateEnemies(dt, player) {
 
 function damageEnemies(bullets) {
   for (const enemy of enemies) {
-    if (!enemy.alive) {
-      continue;
-    }
+    if (!enemy.alive) continue;
 
     for (const bullet of bullets) {
       const hit =
@@ -248,16 +298,13 @@ function damageEnemies(bullets) {
         bullet.y < enemy.y + enemy.height &&
         bullet.y + bullet.height > enemy.y;
 
-      if (!hit) {
-        continue;
-      }
+      if (!hit) continue;
 
       enemy.hp -= 25;
       enemy.hitFlash = 0.12;
       bullet.life = 0;
 
       const angle = Math.atan2(bullet.y - enemy.y, bullet.x - enemy.x);
-
       enemy.kx = -Math.cos(angle) * 120;
       enemy.ky = -Math.sin(angle) * 120;
 
@@ -278,24 +325,40 @@ function damageEnemies(bullets) {
 }
 
 function getEnemyImage(enemy) {
-  if (enemy.type === "pirate") {
-    return pirateImage;
-  }
-
-  if (enemy.type === "skeleton") {
-    return skeletonImage;
-  }
-
-  if (enemy.type === "boss") {
-    return bossImage;
-  }
-
+  if (enemy.type === "pirate") return pirateImage;
+  if (enemy.type === "skeleton") return skeletonImage;
+  if (enemy.type === "boss") return bossImage;
   return null;
 }
 
+function getAttackAnimation(enemy) {
+  if (enemy.state !== "attack") {
+    return {
+      offsetX: 0,
+      offsetY: 0,
+      scale: 1,
+    };
+  }
+
+  const progress = enemy.attackTimer / ATTACK_DURATION;
+  let animationProgress;
+
+  if (progress < 0.5) {
+    animationProgress = progress * 2;
+  } else {
+    animationProgress = (1 - progress) * 2;
+  }
+
+  return {
+    offsetX: enemy.attackTargetX * animationProgress,
+    offsetY: enemy.attackTargetY * animationProgress,
+    scale: 1 + (ATTACK_SCALE - 1) * animationProgress,
+  };
+}
+
 function drawEnemy(ctx, enemy, camera) {
-  const screenX = enemy.x - camera.x + enemy.width / 2;
-  const screenY = enemy.y - camera.y + enemy.height / 2;
+  const baseScreenX = enemy.x - camera.x + enemy.width / 2;
+  const baseScreenY = enemy.y - camera.y + enemy.height / 2;
 
   const image = getEnemyImage(enemy);
 
@@ -311,20 +374,14 @@ function drawEnemy(ctx, enemy, camera) {
     drawHeight = 110;
   }
 
-  ctx.save();
+  const animation = getAttackAnimation(enemy);
+  const screenX = baseScreenX + animation.offsetX;
+  const screenY = baseScreenY + animation.offsetY;
 
-  ctx.fillStyle = "rgba(0, 0, 0, 0.25)";
-  ctx.beginPath();
-  ctx.ellipse(
-    screenX,
-    screenY + drawHeight * 0.32,
-    drawWidth * 0.32,
-    drawHeight * 0.12,
-    0,
-    0,
-    Math.PI * 2,
-  );
-  ctx.fill();
+  drawWidth *= animation.scale;
+  drawHeight *= animation.scale;
+
+  ctx.save();
 
   if (enemy.hitFlash > 0) {
     ctx.globalAlpha = 0.65;
@@ -345,12 +402,13 @@ function drawEnemy(ctx, enemy, camera) {
 
 function drawEnemies(ctx, camera) {
   for (const enemy of enemies) {
-    if (!enemy.alive) {
-      continue;
-    }
-
+    if (!enemy.alive) continue;
     drawEnemy(ctx, enemy, camera);
   }
+}
+
+function getPlayerHitFlash() {
+  return playerHitFlash;
 }
 
 export {
@@ -361,4 +419,5 @@ export {
   generateInitialEnemies,
   spawnEnemy,
   makeEnemy,
+  getPlayerHitFlash,
 };

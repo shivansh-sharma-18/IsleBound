@@ -11,6 +11,7 @@ import {
   updateEnemies,
   damageEnemies,
   generateInitialEnemies,
+  getPlayerHitFlash
 } from "./enemies.js";
 import {
   drawResources,
@@ -310,6 +311,23 @@ function drawCraftingMenu() {
   ctx.textAlign = "left";
 }
 
+function drawPlayerHitEffect() {
+  const flash = getPlayerHitFlash();
+
+  if (flash <= 0) return;
+
+  const alpha = flash / 0.18;
+
+  ctx.fillStyle = `rgba(255, 0, 0, ${alpha * 0.35})`;
+
+  ctx.fillRect(
+    0,
+    0,
+    canvas.width,
+    canvas.height,
+  );
+}
+
 function draw() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
 
@@ -330,6 +348,8 @@ function draw() {
   drawCraftingMenu();
   drawInteractionPrompt();
   drawBoatInteractionPrompt();
+
+  drawPlayerHitEffect();
 
   drawGameOver();
   drawIslandComplete(ctx, canvas);
