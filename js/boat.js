@@ -15,12 +15,15 @@ function craftBoat() {
   boat.crafted = true;
 }
 
+function resetBoat() {
+  boat.crafted = false;
+}
+
 function isNearBoat(player) {
   if (!boat.crafted) return false;
 
   const boatCenterX = boat.x + boat.width / 2;
   const boatCenterY = boat.y + boat.height / 2;
-
   const playerCenterX = player.x + player.width / 2;
   const playerCenterY = player.y + player.height / 2;
 
@@ -38,20 +41,16 @@ function drawBoat(ctx, camera) {
 
   if (!boat.crafted) {
     ctx.save();
-
     ctx.strokeStyle = "#ffffff";
     ctx.lineWidth = 3;
     ctx.setLineDash([8, 6]);
-
     ctx.strokeRect(
       screenX - boat.width / 2,
       screenY - boat.height / 2,
       boat.width,
       boat.height,
     );
-
     ctx.restore();
-
     return;
   }
 
@@ -60,10 +59,8 @@ function drawBoat(ctx, camera) {
   }
 
   ctx.save();
-
   ctx.translate(screenX, screenY);
   ctx.rotate(Math.PI / 2);
-
   ctx.drawImage(
     boatImage,
     -boat.width / 2,
@@ -71,8 +68,7 @@ function drawBoat(ctx, camera) {
     boat.width,
     boat.height,
   );
-
   ctx.restore();
 }
 
-export { boat, craftBoat, drawBoat, isNearBoat };
+export { boat, craftBoat, resetBoat, drawBoat, isNearBoat };

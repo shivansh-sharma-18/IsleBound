@@ -324,6 +324,14 @@ function damageEnemies(bullets) {
   }
 }
 
+function resetEnemies(player) {
+  enemies.length = 0;
+
+  playerHitFlash = 0;
+
+  generateInitialEnemies(player);
+}
+
 function getEnemyImage(enemy) {
   if (enemy.type === "pirate") return pirateImage;
   if (enemy.type === "skeleton") return skeletonImage;
@@ -417,6 +425,7 @@ export {
   updateEnemies,
   damageEnemies,
   generateInitialEnemies,
+  resetEnemies,
   spawnEnemy,
   makeEnemy,
   getPlayerHitFlash,

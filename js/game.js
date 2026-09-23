@@ -1,39 +1,81 @@
 import { canvas, ctx } from "./canvas.js";
 import { drawTerrain } from "./terrain.js";
 import { camera, updateCamera } from "./camera.js";
-import { player, playerImage, playerGunImage } from "./player.js";
+import {
+  player,
+  playerImage,
+  playerGunImage,
+  resetPlayer,
+} from "./player.js";
 import { mouse, keys } from "./input.js";
 import { updatePlayerMovement } from "./movement.js";
 import { drawTrees, drawRocks } from "./obstacles.js";
-import { bullets, shoot, updateBullets, drawBullets } from "./weapons.js";
+import {
+  bullets,
+  shoot,
+  updateBullets,
+  drawBullets,
+  resetBullets,
+} from "./weapons.js";
 import {
   drawEnemies,
   updateEnemies,
   damageEnemies,
   generateInitialEnemies,
-  getPlayerHitFlash
+  resetEnemies,
+  getPlayerHitFlash,
 } from "./enemies.js";
 import {
   drawResources,
   collectResource,
   getNearbyResource,
   updateResources,
+  resetResources,
 } from "./resources.js";
-import { inventory, addResource } from "./inventory.js";
+import {
+  inventory,
+  addResource,
+  resetInventory,
+} from "./inventory.js";
 import { recipes, craft } from "./crafting.js";
-import { craftBoat, drawBoat, isNearBoat } from "./boat.js";
+import {
+  craftBoat,
+  drawBoat,
+  isNearBoat,
+  resetBoat,
+} from "./boat.js";
 import {
   islandCompleted,
   completeIsland,
+  resetIslandCompletion,
   drawIslandComplete,
 } from "./islandComplete.js";
+import {
+  moveToNextIsland,
+  isFinalIsland,
+} from "./islandManager.js";
 
 let craftingOpen = false;
 
+function resetCurrentIsland() {
+  resetPlayer();
+  resetInventory();
+  resetResources();
+  resetEnemies(player);
+  resetBullets();
+  resetBoat();
+  resetIslandCompletion();
+  craftingOpen = false;
+}
+
 function update(dt) {
   if (islandCompleted) {
-    if (keys["r"]) {
-      location.reload();
+    if (keys["e"]) {
+      if (!isFinalIsland()) {
+        moveToNextIsland();
+        resetCurrentIsland();
+      }
+      keys["e"] = false;
     }
     return;
   }
@@ -80,6 +122,7 @@ function update(dt) {
     const buttonHeight = 45;
     const menuWidth = 400;
     const menuHeight = 250;
+
     const menuY = (canvas.height - menuHeight) / 2;
     const buttonX = canvas.width / 2 - buttonWidth / 2;
     const buttonY = menuY + 185;
@@ -113,12 +156,13 @@ function update(dt) {
 
   const mouseWorldX = mouse.x + camera.x;
   const mouseWorldY = mouse.y + camera.y;
+
   const playerCenterX = player.x + player.width / 2;
   const playerCenterY = player.y + player.height / 2;
 
   player.aimAngle = Math.atan2(
     mouseWorldY - playerCenterY,
-    mouseWorldX - playerCenterX,
+    mouseWorldX - playerCenterX
   );
 
   if (player.shootCooldown > 0) {
@@ -135,7 +179,8 @@ function drawPlayer() {
   const screenX = player.x - camera.x;
   const screenY = player.y - camera.y;
 
-  const currentImage = player.weapon === "gun" ? playerGunImage : playerImage;
+  const currentImage =
+    player.weapon === "gun" ? playerGunImage : playerImage;
 
   if (currentImage.complete && currentImage.naturalWidth > 0) {
     const drawX = screenX - (player.spriteWidth - player.width) / 2;
@@ -151,7 +196,7 @@ function drawPlayer() {
       -player.spriteWidth / 2,
       -player.spriteHeight / 2,
       player.spriteWidth,
-      player.spriteHeight,
+      player.spriteHeight
     );
     ctx.restore();
   }
@@ -162,6 +207,7 @@ function drawHealthBar() {
   const barHeight = 20;
   const x = 20;
   const y = 20;
+
   const healthPercentage = player.health / player.maxHealth;
 
   ctx.fillStyle = "#333";
@@ -205,7 +251,9 @@ function drawInventory() {
 }
 
 function drawInteractionPrompt() {
-  if (isNearBoat(player)) return;
+  if (isNearBoat(player)) {
+    return;
+  }
 
   const resource = getNearbyResource(player);
   if (!resource) return;
@@ -220,6 +268,7 @@ function drawInteractionPrompt() {
   const textWidth = ctx.measureText(text).width;
   const boxWidth = textWidth + 30;
   const boxHeight = 40;
+
   const x = (canvas.width - boxWidth) / 2;
   const y = canvas.height - 80;
 
@@ -236,7 +285,9 @@ function drawInteractionPrompt() {
 }
 
 function drawBoatInteractionPrompt() {
-  if (!isNearBoat(player)) return;
+  if (!isNearBoat(player)) {
+    return;
+  }
 
   const text = "Press E to use boat";
 
@@ -244,6 +295,7 @@ function drawBoatInteractionPrompt() {
   const textWidth = ctx.measureText(text).width;
   const boxWidth = textWidth + 30;
   const boxHeight = 40;
+
   const x = (canvas.width - boxWidth) / 2;
   const y = canvas.height - 80;
 
@@ -305,7 +357,7 @@ function drawCraftingMenu() {
   ctx.fillText(
     canCraftBoat ? "Craft Boat" : "Not Enough Resources",
     canvas.width / 2,
-    buttonY + 28,
+    buttonY + 28
   );
 
   ctx.textAlign = "left";
@@ -313,19 +365,12 @@ function drawCraftingMenu() {
 
 function drawPlayerHitEffect() {
   const flash = getPlayerHitFlash();
-
   if (flash <= 0) return;
 
   const alpha = flash / 0.18;
 
   ctx.fillStyle = `rgba(255, 0, 0, ${alpha * 0.35})`;
-
-  ctx.fillRect(
-    0,
-    0,
-    canvas.width,
-    canvas.height,
-  );
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
 }
 
 function draw() {
@@ -348,9 +393,7 @@ function draw() {
   drawCraftingMenu();
   drawInteractionPrompt();
   drawBoatInteractionPrompt();
-
   drawPlayerHitEffect();
-
   drawGameOver();
   drawIslandComplete(ctx, canvas);
 }

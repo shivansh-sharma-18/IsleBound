@@ -43,12 +43,10 @@ function isTooCloseToResource(x, y, width, height) {
 
 function createResource(type) {
   const width = type === "wood" ? 35 : 25;
-
   const height = type === "wood" ? 20 : 25;
 
   for (let attempt = 0; attempt < 1000; attempt++) {
     const x = Math.random() * (world.width - width);
-
     const y = Math.random() * (world.height - height);
 
     const validTerrain = isValidResourcePosition(x, y, width, height);
@@ -90,6 +88,12 @@ function generateResources() {
       resources.push(resource);
     }
   }
+}
+
+function resetResources() {
+  resources.length = 0;
+
+  generateResources();
 }
 
 function updateResources(dt) {
@@ -219,7 +223,6 @@ function collectResource(player) {
   }
 
   resource.collected = true;
-
   resource.respawnTimer = 10;
 
   return {
@@ -236,4 +239,5 @@ export {
   getNearbyResource,
   collectResource,
   updateResources,
+  resetResources,
 };

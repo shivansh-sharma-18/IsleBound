@@ -13,13 +13,10 @@ function shoot(player, targetX, targetY) {
   bullets.push({
     x: playerCenterX,
     y: playerCenterY,
-
     width: 8,
     height: 8,
-
     velocityX: Math.cos(angle) * bulletSpeed,
     velocityY: Math.sin(angle) * bulletSpeed,
-
     life: 2,
   });
 }
@@ -28,7 +25,6 @@ function updateBullets(dt) {
   for (const bullet of bullets) {
     bullet.x += bullet.velocityX * dt;
     bullet.y += bullet.velocityY * dt;
-
     bullet.life -= dt;
 
     if (!isWalkable(bullet.x, bullet.y, bullet.width, bullet.height)) {
@@ -43,15 +39,18 @@ function updateBullets(dt) {
   }
 }
 
+function resetBullets() {
+  bullets.length = 0;
+}
+
 function drawBullets(ctx, camera) {
   for (const bullet of bullets) {
     const screenX = bullet.x - camera.x;
     const screenY = bullet.y - camera.y;
 
     ctx.fillStyle = "#f6ff00";
-
     ctx.fillRect(screenX, screenY, bullet.width, bullet.height);
   }
 }
 
-export { bullets, shoot, updateBullets, drawBullets };
+export { bullets, shoot, updateBullets, drawBullets, resetBullets };
