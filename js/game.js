@@ -1,12 +1,7 @@
 import { canvas, ctx } from "./canvas.js";
 import { drawTerrain } from "./terrain.js";
 import { camera, updateCamera } from "./camera.js";
-import {
-  player,
-  playerImage,
-  playerGunImage,
-  resetPlayer,
-} from "./player.js";
+import { player, playerImage, playerGunImage, resetPlayer } from "./player.js";
 import { mouse, keys } from "./input.js";
 import { updatePlayerMovement } from "./movement.js";
 import { drawTrees, drawRocks } from "./obstacles.js";
@@ -32,30 +27,19 @@ import {
   updateResources,
   resetResources,
 } from "./resources.js";
-import {
-  inventory,
-  addResource,
-  resetInventory,
-} from "./inventory.js";
+import { inventory, addResource, resetInventory } from "./inventory.js";
 import { recipes, craft } from "./crafting.js";
-import {
-  craftBoat,
-  drawBoat,
-  isNearBoat,
-  resetBoat,
-} from "./boat.js";
+import { craftBoat, drawBoat, isNearBoat, resetBoat } from "./boat.js";
 import {
   islandCompleted,
   completeIsland,
   resetIslandCompletion,
   drawIslandComplete,
 } from "./islandComplete.js";
-import {
-  moveToNextIsland,
-  isFinalIsland,
-} from "./islandManager.js";
+import { moveToNextIsland, isFinalIsland } from "./islandManager.js";
 
 let craftingOpen = false;
+let gamePaused = false;
 
 function resetCurrentIsland() {
   resetPlayer();
@@ -90,6 +74,15 @@ function update(dt) {
   if (keys["c"]) {
     craftingOpen = !craftingOpen;
     keys["c"] = false;
+  }
+
+  if (keys["p"]) {
+    gamePaused = !gamePaused;
+    keys["p"] = false;
+  }
+
+  if (gamePaused) {
+    return;
   }
 
   updatePlayerMovement(dt);
@@ -162,7 +155,7 @@ function update(dt) {
 
   player.aimAngle = Math.atan2(
     mouseWorldY - playerCenterY,
-    mouseWorldX - playerCenterX
+    mouseWorldX - playerCenterX,
   );
 
   if (player.shootCooldown > 0) {
@@ -179,8 +172,7 @@ function drawPlayer() {
   const screenX = player.x - camera.x;
   const screenY = player.y - camera.y;
 
-  const currentImage =
-    player.weapon === "gun" ? playerGunImage : playerImage;
+  const currentImage = player.weapon === "gun" ? playerGunImage : playerImage;
 
   if (currentImage.complete && currentImage.naturalWidth > 0) {
     const drawX = screenX - (player.spriteWidth - player.width) / 2;
@@ -196,7 +188,7 @@ function drawPlayer() {
       -player.spriteWidth / 2,
       -player.spriteHeight / 2,
       player.spriteWidth,
-      player.spriteHeight
+      player.spriteHeight,
     );
     ctx.restore();
   }
@@ -357,7 +349,7 @@ function drawCraftingMenu() {
   ctx.fillText(
     canCraftBoat ? "Craft Boat" : "Not Enough Resources",
     canvas.width / 2,
-    buttonY + 28
+    buttonY + 28,
   );
 
   ctx.textAlign = "left";
@@ -371,6 +363,28 @@ function drawPlayerHitEffect() {
 
   ctx.fillStyle = `rgba(255, 0, 0, ${alpha * 0.35})`;
   ctx.fillRect(0, 0, canvas.width, canvas.height);
+}
+
+function drawPauseScreen() {
+  if (!gamePaused) return;
+
+  ctx.fillStyle = "rgba(0, 0, 0, 0.6)";
+
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+  ctx.fillStyle = "#ffffff";
+
+  ctx.textAlign = "center";
+
+  ctx.font = "bold 52px Arial";
+
+  ctx.fillText("PAUSED", canvas.width / 2, canvas.height / 2 - 20);
+
+  ctx.font = "24px Arial";
+
+  ctx.fillText("Press P to Resume", canvas.width / 2, canvas.height / 2 + 30);
+
+  ctx.textAlign = "left";
 }
 
 function draw() {
@@ -396,6 +410,7 @@ function draw() {
   drawPlayerHitEffect();
   drawGameOver();
   drawIslandComplete(ctx, canvas);
+  drawPauseScreen();
 }
 
 generateInitialEnemies(player);
