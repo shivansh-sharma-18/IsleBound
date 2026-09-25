@@ -1,19 +1,54 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-    <title>Pirate Island Survival</title>
+    <title>IsleBound</title>
 
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="style.css" />
     <script type="module" src="./js/main.js"></script>
-</head>
+  </head>
 
-<body>
+  <body>
+    <div id="mainMenu" class="menu-screen">
+      <h1>ISLEBOUND</h1>
+
+      <button id="playButton">PLAY GAME</button>
+      <button id="controlsButton">CONTROLS</button>
+      <button id="creditsButton">CREDITS</button>
+    </div>
+
+    <div id="controlsScreen" class="menu-screen hidden">
+      <h2>CONTROLS</h2>
+
+      <div class="controls-list">
+        <p><span>WASD / Arrow Keys</span> → Move</p>
+        <p><span>Mouse</span> → Aim</p>
+        <p><span>Left Click</span> → Shoot</p>
+        <p><span>E</span> → Interact / Gather</p>
+        <p><span>C</span> → Crafting</p>
+        <p><span>B</span> → Craft Boat</p>
+        <p><span>P</span> → Pause</p>
+      </div>
+
+      <button id="controlsBackButton">BACK</button>
+    </div>
+
+    <div id="creditsScreen" class="menu-screen hidden">
+      <h2>CREDITS</h2>
+
+      <div class="credits-content">
+        <p class="game-title">ISLEBOUND</p>
+        <p>Developed by Shivansh Sharma</p>
+        <p>HTML5 Canvas</p>
+        <p>CSS</p>
+        <p>JavaScript</p>
+      </div>
+
+      <button id="creditsBackButton">BACK</button>
+    </div>
 
     <canvas id="gameCanvas"></canvas>
-
-    
-</body>
+  </body>
 </html>
