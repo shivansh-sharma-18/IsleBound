@@ -1,4 +1,5 @@
 import { isWalkable } from "./collision.js";
+import { recordShotFired } from "./stats.js";
 
 const bullets = [];
 
@@ -19,6 +20,8 @@ function shoot(player, targetX, targetY) {
     velocityY: Math.sin(angle) * bulletSpeed,
     life: 2,
   });
+
+  recordShotFired();
 }
 
 function updateBullets(dt) {

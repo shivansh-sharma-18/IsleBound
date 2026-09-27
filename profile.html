@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>IsleBound - Player Profile</title>
+
+    <link rel="stylesheet" href="./css/profile.css">
+</head>
+
+<body>
+
+    <main class="profile-page">
+
+        <header class="profile-header">
+            <h1>ISLEBOUND</h1>
+            <h2>PLAYER PROFILE</h2>
+        </header>
+
+        <!-- Profile creation / editing -->
+        <section id="profileFormSection" class="profile-card">
+
+            <h3>PLAYER PROFILE</h3>
+
+            <form id="profileForm">
+
+                <label for="playerName">Player Name</label>
+
+                <input
+                    type="text"
+                    id="playerName"
+                    placeholder="Enter player name"
+                    maxlength="20"
+                    required
+                >
+
+                <button type="submit" id="saveProfileButton">
+                    CREATE PROFILE
+                </button>
+
+            </form>
+
+        </section>
+
+
+        <!-- Statistics -->
+        <section id="statsSection" class="profile-card hidden">
+
+            <h3>PLAYER STATISTICS</h3>
+
+            <div class="stats-grid">
+
+                <div class="stat">
+                    <span>Player Name</span>
+                    <strong id="displayPlayerName">-</strong>
+                </div>
+
+                <div class="stat">
+                    <span>Games Played</span>
+                    <strong id="gamesPlayed">0</strong>
+                </div>
+
+                <div class="stat">
+                    <span>Current Island</span>
+                    <strong id="currentIsland">1</strong>
+                </div>
+
+                <div class="stat">
+                    <span>Islands Completed</span>
+                    <strong id="islandsCompleted">0</strong>
+                </div>
+
+                <div class="stat">
+                    <span>Enemies Defeated</span>
+                    <strong id="enemiesDefeated">0</strong>
+                </div>
+
+                <div class="stat">
+                    <span>Pirates Defeated</span>
+                    <strong id="piratesDefeated">0</strong>
+                </div>
+
+                <div class="stat">
+                    <span>Skeletons Defeated</span>
+                    <strong id="skeletonsDefeated">0</strong>
+                </div>
+
+                <div class="stat">
+                    <span>Bosses Defeated</span>
+                    <strong id="bossesDefeated">0</strong>
+                </div>
+
+                <div class="stat">
+                    <span>Shots Fired</span>
+                    <strong id="shotsFired">0</strong>
+                </div>
+
+                <div class="stat">
+                    <span>Damage Dealt</span>
+                    <strong id="damageDealt">0</strong>
+                </div>
+
+                <div class="stat">
+                    <span>Wood Collected</span>
+                    <strong id="woodCollected">0</strong>
+                </div>
+
+                <div class="stat">
+                    <span>Stone Collected</span>
+                    <strong id="stoneCollected">0</strong>
+                </div>
+
+                <div class="stat">
+                    <span>Deaths</span>
+                    <strong id="deaths">0</strong>
+                </div>
+
+                <div class="stat">
+                    <span>Total Play Time</span>
+                    <strong id="totalPlayTime">0:00</strong>
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- Actions -->
+        <section class="profile-actions">
+
+            <button id="editProfileButton">
+                EDIT PROFILE
+            </button>
+
+            <button id="resetProfileButton">
+                RESET PROFILE
+            </button>
+
+            <button id="backToGameButton">
+                BACK TO GAME
+            </button>
+
+        </section>
+
+    </main>
+
+
+    <script type="module" src="./js/profile.js"></script>
+
+</body>
+
+</html>

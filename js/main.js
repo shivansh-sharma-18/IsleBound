@@ -1,5 +1,6 @@
 import { gameLoop } from "./gameLoop.js";
 import { update, draw } from "./game.js";
+import { recordGameStarted } from "./stats.js";
 
 const canvas = document.getElementById("gameCanvas");
 
@@ -14,13 +15,17 @@ const creditsButton = document.getElementById("creditsButton");
 const controlsBackButton = document.getElementById("controlsBackButton");
 const creditsBackButton = document.getElementById("creditsBackButton");
 
+const profileButton = document.getElementById("profileButton");
+
 let gameStarted = false;
 
 playButton.addEventListener("click", () => {
   mainMenu.classList.add("hidden");
   canvas.style.display = "block";
+
   if (!gameStarted) {
     gameStarted = true;
+    recordGameStarted();
     requestAnimationFrame((timestamp) => {
       gameLoop(timestamp, update, draw);
     });
@@ -45,4 +50,8 @@ creditsButton.addEventListener("click", () => {
 creditsBackButton.addEventListener("click", () => {
   creditsScreen.classList.add("hidden");
   mainMenu.classList.remove("hidden");
+});
+
+profileButton.addEventListener("click", () => {
+  window.location.href = "profile.html";
 });

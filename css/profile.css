@@ -1,0 +1,176 @@
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    min-height: 100vh;
+    font-family: Arial, sans-serif;
+    color: white;
+    background: radial-gradient(
+        circle at center,
+        #243447 0%,
+        #101820 50%,
+        #05080b 100%
+    );
+}
+
+.profile-page {
+    width: min(1000px, 92%);
+    margin: 0 auto;
+    padding: 40px 0 50px;
+}
+
+.profile-header {
+    text-align: center;
+    margin-bottom: 35px;
+}
+
+.profile-header h1 {
+    margin: 0;
+    font-size: clamp(42px, 8vw, 72px);
+    letter-spacing: 8px;
+}
+
+.profile-header h2 {
+    margin: 10px 0 0;
+    font-size: clamp(22px, 4vw, 36px);
+    letter-spacing: 4px;
+}
+
+.profile-card {
+    padding: 25px;
+    margin-bottom: 25px;
+    border: 2px solid rgba(255, 255, 255, 0.8);
+    background: rgba(0, 0, 0, 0.25);
+}
+
+.profile-card h3 {
+    margin: 0 0 25px;
+    text-align: center;
+    font-size: 24px;
+    letter-spacing: 2px;
+}
+
+#profileForm {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    max-width: 500px;
+    margin: 0 auto;
+}
+
+#profileForm label {
+    font-size: 18px;
+    font-weight: bold;
+}
+
+#profileForm input {
+    width: 100%;
+    padding: 13px;
+    border: 2px solid white;
+    background: rgba(0, 0, 0, 0.35);
+    color: white;
+    font-size: 17px;
+    outline: none;
+}
+
+#profileForm input::placeholder {
+    color: #bbbbbb;
+}
+
+#profileForm button {
+    margin-top: 5px;
+}
+
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 15px;
+}
+
+.stat {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 20px;
+    padding: 15px;
+    border: 1px solid rgba(255, 255, 255, 0.35);
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.stat span {
+    font-size: 16px;
+}
+
+.stat strong {
+    font-size: 18px;
+}
+
+.profile-actions {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 12px;
+}
+
+button {
+    padding: 13px 22px;
+    border: 2px solid white;
+    background: transparent;
+    color: white;
+    font-size: 16px;
+    font-weight: bold;
+    letter-spacing: 1px;
+    cursor: pointer;
+    transition:
+        background 0.2s,
+        color 0.2s,
+        transform 0.2s;
+}
+
+button:hover {
+    background: white;
+    color: #101820;
+    transform: scale(1.03);
+}
+
+.hidden {
+    display: none;
+}
+
+@media (max-width: 700px) {
+    .profile-page {
+        padding-top: 25px;
+    }
+
+    .stats-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .profile-card {
+        padding: 18px;
+    }
+
+    .stat {
+        padding: 13px;
+    }
+}
+
+@media (max-width: 450px) {
+    .profile-header h1 {
+        letter-spacing: 4px;
+    }
+
+    .profile-header h2 {
+        letter-spacing: 2px;
+    }
+
+    .profile-actions {
+        flex-direction: column;
+    }
+
+    .profile-actions button {
+        width: 100%;
+    }
+}

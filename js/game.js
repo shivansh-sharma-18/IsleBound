@@ -36,7 +36,18 @@ import {
   resetIslandCompletion,
   drawIslandComplete,
 } from "./islandComplete.js";
-import { moveToNextIsland, isFinalIsland } from "./islandManager.js";
+import {
+  moveToNextIsland,
+  isFinalIsland,
+  getCurrentIsland,
+} from "./islandManager.js";
+import {
+  recordResourceCollected,
+  recordDeath,
+  recordIslandCompleted,
+  setCurrentIsland,
+  addPlayTime,
+} from "./stats.js";
 
 let craftingOpen = false;
 let gamePaused = false;
@@ -56,8 +67,11 @@ function update(dt) {
   if (islandCompleted) {
     if (keys["e"]) {
       if (!isFinalIsland()) {
-        moveToNextIsland();
-        resetCurrentIsland();
+        const movedToNextIsland = moveToNextIsland();
+        if (movedToNextIsland) {
+          setCurrentIsland(getCurrentIsland());
+          resetCurrentIsland();
+        }
       }
       keys["e"] = false;
     }
@@ -85,16 +99,24 @@ function update(dt) {
     return;
   }
 
+  addPlayTime(dt);
   updatePlayerMovement(dt);
   updateResources(dt);
 
   if (keys["e"]) {
     if (isNearBoat(player)) {
-      completeIsland();
+      if (!islandCompleted) {
+        completeIsland();
+        recordIslandCompleted();
+      }
     } else {
       const collectedResource = collectResource(player);
       if (collectedResource) {
         addResource(collectedResource.type, collectedResource.amount);
+        recordResourceCollected(
+          collectedResource.type,
+          collectedResource.amount,
+        );
       }
     }
     keys["e"] = false;
@@ -142,7 +164,10 @@ function update(dt) {
 
   if (player.health <= 0) {
     player.health = 0;
-    player.gameOver = true;
+    if (!player.gameOver) {
+      player.gameOver = true;
+      recordDeath();
+    }
   }
 
   updateCamera(player, canvas);
@@ -369,19 +394,14 @@ function drawPauseScreen() {
   if (!gamePaused) return;
 
   ctx.fillStyle = "rgba(0, 0, 0, 0.6)";
-
   ctx.fillRect(0, 0, canvas.width, canvas.height);
 
   ctx.fillStyle = "#ffffff";
-
   ctx.textAlign = "center";
-
   ctx.font = "bold 52px Arial";
-
   ctx.fillText("PAUSED", canvas.width / 2, canvas.height / 2 - 20);
 
   ctx.font = "24px Arial";
-
   ctx.fillText("Press P to Resume", canvas.width / 2, canvas.height / 2 + 30);
 
   ctx.textAlign = "left";

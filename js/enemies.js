@@ -1,4 +1,5 @@
 import { isWalkable, isTooCloseToObstacle } from "./collision.js";
+import { recordEnemyDefeated, recordDamageDealt } from "./stats.js";
 
 const ENEMY_TYPES = {
   pirate: {
@@ -304,13 +305,18 @@ function damageEnemies(bullets) {
       enemy.hitFlash = 0.12;
       bullet.life = 0;
 
+      recordDamageDealt(25);
+
       const angle = Math.atan2(bullet.y - enemy.y, bullet.x - enemy.x);
+
       enemy.kx = -Math.cos(angle) * 120;
       enemy.ky = -Math.sin(angle) * 120;
 
       if (enemy.hp <= 0) {
         enemy.hp = 0;
         enemy.alive = false;
+
+        recordEnemyDefeated(enemy.type);
       }
 
       break;
@@ -326,9 +332,7 @@ function damageEnemies(bullets) {
 
 function resetEnemies(player) {
   enemies.length = 0;
-
   playerHitFlash = 0;
-
   generateInitialEnemies(player);
 }
 
