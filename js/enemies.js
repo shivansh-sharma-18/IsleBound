@@ -5,7 +5,7 @@ const ENEMY_TYPES = {
   pirate: {
     hp: 40,
     speed: 95,
-    detectionRange: 220,
+    detectionRange: 500,
     attackRange: 55,
     attackCooldown: 1.1,
     damage: 8,
@@ -14,7 +14,7 @@ const ENEMY_TYPES = {
   skeleton: {
     hp: 60,
     speed: 125,
-    detectionRange: 250,
+    detectionRange: 550,
     attackRange: 50,
     attackCooldown: 0.8,
     damage: 12,
@@ -23,7 +23,7 @@ const ENEMY_TYPES = {
   boss: {
     hp: 420,
     speed: 90,
-    detectionRange: 520,
+    detectionRange: 700,
     attackRange: 80,
     attackCooldown: 1.3,
     damage: 22,
