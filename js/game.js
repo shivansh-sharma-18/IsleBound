@@ -28,7 +28,7 @@ import {
   resetResources,
 } from "./resources.js";
 import { inventory, addResource, resetInventory } from "./inventory.js";
-import { recipes, craft } from "./crafting.js";
+import { getBoatRecipe, craft } from "./crafting.js";
 import { craftBoat, drawBoat, isNearBoat, resetBoat } from "./boat.js";
 import {
   islandCompleted,
@@ -54,7 +54,6 @@ let gamePaused = false;
 
 function resetCurrentIsland() {
   resetPlayer();
-  resetInventory();
   resetResources();
   resetEnemies(player);
   resetBullets();
@@ -68,13 +67,16 @@ function update(dt) {
     if (keys["e"]) {
       if (!isFinalIsland()) {
         const movedToNextIsland = moveToNextIsland();
+
         if (movedToNextIsland) {
           setCurrentIsland(getCurrentIsland());
           resetCurrentIsland();
         }
       }
+
       keys["e"] = false;
     }
+
     return;
   }
 
@@ -82,6 +84,7 @@ function update(dt) {
     if (keys["r"]) {
       location.reload();
     }
+
     return;
   }
 
@@ -100,6 +103,7 @@ function update(dt) {
   }
 
   addPlayTime(dt);
+
   updatePlayerMovement(dt);
   updateResources(dt);
 
@@ -111,24 +115,29 @@ function update(dt) {
       }
     } else {
       const collectedResource = collectResource(player);
+
       if (collectedResource) {
         addResource(collectedResource.type, collectedResource.amount);
+
         recordResourceCollected(
           collectedResource.type,
           collectedResource.amount,
         );
       }
     }
+
     keys["e"] = false;
   }
 
   if (keys["b"]) {
     if (craftingOpen) {
-      const crafted = craft(recipes.boat);
+      const crafted = craft(getBoatRecipe());
+
       if (crafted) {
         craftBoat();
       }
     }
+
     keys["b"] = false;
   }
 
@@ -149,7 +158,8 @@ function update(dt) {
       mouse.y <= buttonY + buttonHeight;
 
     if (clickedInsideButton) {
-      const crafted = craft(recipes.boat);
+      const crafted = craft(getBoatRecipe());
+
       if (crafted) {
         craftBoat();
       }
@@ -164,6 +174,7 @@ function update(dt) {
 
   if (player.health <= 0) {
     player.health = 0;
+
     if (!player.gameOver) {
       player.gameOver = true;
       recordDeath();
@@ -201,13 +212,18 @@ function drawPlayer() {
 
   if (currentImage.complete && currentImage.naturalWidth > 0) {
     const drawX = screenX - (player.spriteWidth - player.width) / 2;
+
     const drawY = screenY - (player.spriteHeight - player.height);
+
     const centerX = drawX + player.spriteWidth / 2;
+
     const centerY = drawY + player.spriteHeight / 2;
 
     ctx.save();
+
     ctx.translate(centerX, centerY);
     ctx.rotate(player.aimAngle);
+
     ctx.drawImage(
       currentImage,
       -player.spriteWidth / 2,
@@ -215,6 +231,7 @@ function drawPlayer() {
       player.spriteWidth,
       player.spriteHeight,
     );
+
     ctx.restore();
   }
 }
@@ -246,9 +263,11 @@ function drawGameOver() {
   ctx.fillStyle = "#fff";
   ctx.font = "bold 60px Arial";
   ctx.textAlign = "center";
+
   ctx.fillText("GAME OVER", canvas.width / 2, canvas.height / 2);
 
   ctx.font = "24px Arial";
+
   ctx.fillText("Press R to restart", canvas.width / 2, canvas.height / 2 + 50);
 
   ctx.textAlign = "left";
@@ -263,7 +282,9 @@ function drawInventory() {
 
   ctx.fillStyle = "#fff";
   ctx.font = "18px Arial";
+
   ctx.fillText(`Wood: ${inventory.wood}`, x + 15, y + 25);
+
   ctx.fillText(`Stone: ${inventory.stone}`, x + 15, y + 50);
 }
 
@@ -273,28 +294,40 @@ function drawInteractionPrompt() {
   }
 
   const resource = getNearbyResource(player);
+
   if (!resource) return;
 
   let resourceName = "";
-  if (resource.type === "wood") resourceName = "Wood";
-  if (resource.type === "stone") resourceName = "Stone";
+
+  if (resource.type === "wood") {
+    resourceName = "Wood";
+  }
+
+  if (resource.type === "stone") {
+    resourceName = "Stone";
+  }
 
   const text = `Press E to gather ${resourceName} (+${resource.amount})`;
 
   ctx.font = "18px Arial";
+
   const textWidth = ctx.measureText(text).width;
+
   const boxWidth = textWidth + 30;
   const boxHeight = 40;
 
   const x = (canvas.width - boxWidth) / 2;
+
   const y = canvas.height - 80;
 
   ctx.fillStyle = "rgba(0, 0, 0, 0.75)";
+
   ctx.fillRect(x, y, boxWidth, boxHeight);
 
   ctx.fillStyle = "#ffffff";
   ctx.textAlign = "center";
   ctx.textBaseline = "middle";
+
   ctx.fillText(text, canvas.width / 2, y + boxHeight / 2);
 
   ctx.textAlign = "left";
@@ -309,19 +342,24 @@ function drawBoatInteractionPrompt() {
   const text = "Press E to use boat";
 
   ctx.font = "18px Arial";
+
   const textWidth = ctx.measureText(text).width;
+
   const boxWidth = textWidth + 30;
   const boxHeight = 40;
 
   const x = (canvas.width - boxWidth) / 2;
+
   const y = canvas.height - 80;
 
   ctx.fillStyle = "rgba(0, 0, 0, 0.75)";
+
   ctx.fillRect(x, y, boxWidth, boxHeight);
 
   ctx.fillStyle = "#ffffff";
   ctx.textAlign = "center";
   ctx.textBaseline = "middle";
+
   ctx.fillText(text, canvas.width / 2, y + boxHeight / 2);
 
   ctx.textAlign = "left";
@@ -333,44 +371,60 @@ function drawCraftingMenu() {
 
   const width = 400;
   const height = 250;
+
   const x = (canvas.width - width) / 2;
+
   const y = (canvas.height - height) / 2;
 
+  const boatRecipe = getBoatRecipe();
+
   const canCraftBoat =
-    inventory.wood >= recipes.boat.wood &&
-    inventory.stone >= recipes.boat.stone;
+    boatRecipe &&
+    inventory.wood >= boatRecipe.wood &&
+    inventory.stone >= boatRecipe.stone;
 
   ctx.fillStyle = "rgba(0, 0, 0, 0.85)";
+
   ctx.fillRect(x, y, width, height);
 
   ctx.strokeStyle = "#ffffff";
+
   ctx.strokeRect(x, y, width, height);
 
   ctx.fillStyle = "#ffffff";
   ctx.font = "bold 28px Arial";
   ctx.textAlign = "center";
+
   ctx.fillText("Crafting", canvas.width / 2, y + 45);
 
   ctx.font = "20px Arial";
+
   ctx.fillText("Boat", canvas.width / 2, y + 100);
 
   ctx.font = "18px Arial";
-  ctx.fillText(`Wood: ${recipes.boat.wood}`, canvas.width / 2, y + 140);
-  ctx.fillText(`Stone: ${recipes.boat.stone}`, canvas.width / 2, y + 170);
+
+  ctx.fillText(`Wood: ${boatRecipe.wood}`, canvas.width / 2, y + 140);
+
+  ctx.fillText(`Stone: ${boatRecipe.stone}`, canvas.width / 2, y + 170);
 
   const buttonWidth = 180;
   const buttonHeight = 45;
+
   const buttonX = canvas.width / 2 - buttonWidth / 2;
+
   const buttonY = y + 185;
 
   ctx.fillStyle = canCraftBoat ? "#2ecc71" : "#555";
+
   ctx.fillRect(buttonX, buttonY, buttonWidth, buttonHeight);
 
   ctx.strokeStyle = "#ffffff";
+
   ctx.strokeRect(buttonX, buttonY, buttonWidth, buttonHeight);
 
   ctx.fillStyle = "#ffffff";
   ctx.font = "16px Arial";
+
   ctx.fillText(
     canCraftBoat ? "Craft Boat" : "Not Enough Resources",
     canvas.width / 2,
@@ -382,11 +436,13 @@ function drawCraftingMenu() {
 
 function drawPlayerHitEffect() {
   const flash = getPlayerHitFlash();
+
   if (flash <= 0) return;
 
   const alpha = flash / 0.18;
 
   ctx.fillStyle = `rgba(255, 0, 0, ${alpha * 0.35})`;
+
   ctx.fillRect(0, 0, canvas.width, canvas.height);
 }
 
@@ -394,14 +450,17 @@ function drawPauseScreen() {
   if (!gamePaused) return;
 
   ctx.fillStyle = "rgba(0, 0, 0, 0.6)";
+
   ctx.fillRect(0, 0, canvas.width, canvas.height);
 
   ctx.fillStyle = "#ffffff";
   ctx.textAlign = "center";
   ctx.font = "bold 52px Arial";
+
   ctx.fillText("PAUSED", canvas.width / 2, canvas.height / 2 - 20);
 
   ctx.font = "24px Arial";
+
   ctx.fillText("Press P to Resume", canvas.width / 2, canvas.height / 2 + 30);
 
   ctx.textAlign = "left";
@@ -411,6 +470,7 @@ function draw() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
 
   ctx.fillStyle = "#8fd3e6";
+
   ctx.fillRect(0, 0, canvas.width, canvas.height);
 
   drawTerrain(ctx, canvas, camera);

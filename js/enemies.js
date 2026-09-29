@@ -1,5 +1,6 @@
 import { isWalkable, isTooCloseToObstacle } from "./collision.js";
 import { recordEnemyDefeated, recordDamageDealt } from "./stats.js";
+import { getCurrentIsland } from "./islandManager.js";
 
 const ENEMY_TYPES = {
   pirate: {
@@ -51,10 +52,24 @@ const ATTACK_SCALE = 1.15;
 
 let playerHitFlash = 0;
 
-const INITIAL_ENEMY_COUNTS = {
-  pirate: 6,
-  skeleton: 4,
-  boss: 0,
+const ENEMY_COUNTS = {
+  1: {
+    pirate: 6,
+    skeleton: 4,
+    boss: 0,
+  },
+
+  2: {
+    pirate: 10,
+    skeleton: 7,
+    boss: 0,
+  },
+
+  3: {
+    pirate: 6,
+    skeleton: 4,
+    boss: 1,
+  },
 };
 
 function makeEnemy(type, x, y) {
@@ -124,7 +139,14 @@ function spawnEnemy(player, type = null) {
 }
 
 function generateInitialEnemies(player) {
-  for (const [type, count] of Object.entries(INITIAL_ENEMY_COUNTS)) {
+  const island = getCurrentIsland();
+  const enemyCounts = ENEMY_COUNTS[island];
+
+  if (!enemyCounts) {
+    return;
+  }
+
+  for (const [type, count] of Object.entries(enemyCounts)) {
     for (let i = 0; i < count; i++) {
       spawnEnemy(player, type);
     }

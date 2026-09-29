@@ -1,6 +1,7 @@
 import { world, TILE_SIZE } from "./world.js";
 import { getTerrainTile } from "./terrain.js";
 import { isTooCloseToObstacle } from "./collision.js";
+import { getCurrentIsland } from "./islandManager.js";
 
 const resources = [];
 
@@ -72,8 +73,32 @@ function createResource(type) {
   return null;
 }
 
+const RESOURCE_COUNTS = {
+  1: {
+    wood: 15,
+    stone: 10,
+  },
+
+  2: {
+    wood: 25,
+    stone: 15,
+  },
+
+  3: {
+    wood: 25,
+    stone: 15,
+  },
+};
+
 function generateResources() {
-  for (let i = 0; i < 15; i++) {
+  const island = getCurrentIsland();
+  const resourceCounts = RESOURCE_COUNTS[island];
+
+  if (!resourceCounts) {
+    return;
+  }
+
+  for (let i = 0; i < resourceCounts.wood; i++) {
     const resource = createResource("wood");
 
     if (resource) {
@@ -81,7 +106,7 @@ function generateResources() {
     }
   }
 
-  for (let i = 0; i < 10; i++) {
+  for (let i = 0; i < resourceCounts.stone; i++) {
     const resource = createResource("stone");
 
     if (resource) {

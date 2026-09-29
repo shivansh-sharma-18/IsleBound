@@ -1,3 +1,5 @@
+import { setTerrainMap } from "./world.js";
+
 let currentIsland = 1;
 
 const totalIslands = 3;
@@ -9,6 +11,8 @@ function getCurrentIsland() {
 function moveToNextIsland() {
   if (currentIsland < totalIslands) {
     currentIsland++;
+
+    setTerrainMap(currentIsland);
 
     return true;
   }
