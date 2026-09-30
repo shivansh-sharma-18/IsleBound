@@ -3,7 +3,7 @@ import { TILE_SIZE, terrainMap } from "./world.js";
 const terrainImages = {};
 
 const terrainFiles = {
-    water: "assets/environment/water/rpgpack_rpgTile013.png",
+    water: "assets/environment/water/rpgpack_rpgTile029.png",
     sand: "assets/environment/terrain/tile_18.png",
     grass: "assets/environment/terrain/tile_39.png",
 };
