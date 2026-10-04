@@ -22,12 +22,12 @@ const ENEMY_TYPES = {
     radius: 16,
   },
   boss: {
-    hp: 420,
-    speed: 90,
+    hp: 600,
+    speed: 95,
     detectionRange: 700,
     attackRange: 80,
-    attackCooldown: 1.3,
-    damage: 22,
+    attackCooldown: 1.2,
+    damage: 25,
     radius: 34,
   },
 };
@@ -51,6 +51,7 @@ const ATTACK_LUNGE_DISTANCE = 18;
 const ATTACK_SCALE = 1.15;
 
 let playerHitFlash = 0;
+let island3RegularKills = 0;
 
 const ENEMY_COUNTS = {
   1: {
@@ -66,9 +67,9 @@ const ENEMY_COUNTS = {
   },
 
   3: {
-    pirate: 6,
-    skeleton: 4,
-    boss: 1,
+    pirate: 10,
+    skeleton: 10,
+    boss: 0,
   },
 };
 
@@ -310,6 +311,50 @@ function updateEnemies(dt, player) {
   }
 }
 
+function spawnBoss(player) {
+  spawnEnemy(player, "boss");
+}
+
+function spawnReinforcementEnemy(player) {
+  const currentReinforcements = enemies.filter(
+    (e) => e.alive && e.isReinforcement,
+  ).length;
+
+  if (currentReinforcements >= 4) {
+    return;
+  }
+
+  for (let attempt = 0; attempt < 1000; attempt++) {
+    const x = Math.random() * 1800 + 500;
+    const y = Math.random() * 1000 + 400;
+
+    const distance = Math.hypot(x - player.x, y - player.y);
+
+    if (distance < 400) continue;
+    if (!isWalkable(x, y, ENEMY_WIDTH, ENEMY_HEIGHT)) continue;
+    if (isTooCloseToObstacle(x, y, ENEMY_WIDTH, ENEMY_HEIGHT)) continue;
+
+    const types = ["pirate", "skeleton"];
+    const enemyType = types[Math.floor(Math.random() * types.length)];
+    const enemy = makeEnemy(enemyType, x, y);
+
+    if (enemy) {
+      enemy.isReinforcement = true;
+      enemies.push(enemy);
+    }
+
+    return;
+  }
+}
+
+function isBossAlive() {
+  return enemies.some((e) => e.alive && e.type === "boss");
+}
+
+function getIsland3RegularKills() {
+  return island3RegularKills;
+}
+
 function damageEnemies(bullets) {
   for (const enemy of enemies) {
     if (!enemy.alive) continue;
@@ -323,11 +368,12 @@ function damageEnemies(bullets) {
 
       if (!hit) continue;
 
-      enemy.hp -= 25;
+      const damage = bullet.damage || 25;
+      enemy.hp -= damage;
       enemy.hitFlash = 0.12;
       bullet.life = 0;
 
-      recordDamageDealt(25);
+      recordDamageDealt(damage);
 
       const angle = Math.atan2(bullet.y - enemy.y, bullet.x - enemy.x);
 
@@ -337,6 +383,13 @@ function damageEnemies(bullets) {
       if (enemy.hp <= 0) {
         enemy.hp = 0;
         enemy.alive = false;
+
+        if (
+          getCurrentIsland() === 3 &&
+          (enemy.type === "pirate" || enemy.type === "skeleton")
+        ) {
+          island3RegularKills++;
+        }
 
         recordEnemyDefeated(enemy.type);
       }
@@ -355,6 +408,7 @@ function damageEnemies(bullets) {
 function resetEnemies(player) {
   enemies.length = 0;
   playerHitFlash = 0;
+  island3RegularKills = 0;
   generateInitialEnemies(player);
 }
 
@@ -432,6 +486,26 @@ function drawEnemy(ctx, enemy, camera) {
   ctx.drawImage(image, -drawWidth / 2, -drawHeight / 2, drawWidth, drawHeight);
 
   ctx.restore();
+
+  if (enemy.type === "boss" && enemy.alive) {
+    const barWidth = 110;
+    const barHeight = 8;
+    const barX = screenX - barWidth / 2;
+    const barY = screenY - drawHeight / 2 - 14;
+
+    ctx.save();
+    ctx.fillStyle = "rgba(0, 0, 0, 0.7)";
+    ctx.fillRect(barX, barY, barWidth, barHeight);
+
+    const hpPercent = Math.max(0, enemy.hp / enemy.maxHp);
+    ctx.fillStyle = "#e74c3c";
+    ctx.fillRect(barX, barY, barWidth * hpPercent, barHeight);
+
+    ctx.strokeStyle = "#ffffff";
+    ctx.lineWidth = 1;
+    ctx.strokeRect(barX, barY, barWidth, barHeight);
+    ctx.restore();
+  }
 }
 
 function drawEnemies(ctx, camera) {
@@ -453,6 +527,10 @@ export {
   generateInitialEnemies,
   resetEnemies,
   spawnEnemy,
+  spawnBoss,
+  spawnReinforcementEnemy,
+  isBossAlive,
+  getIsland3RegularKills,
   makeEnemy,
   getPlayerHitFlash,
 };

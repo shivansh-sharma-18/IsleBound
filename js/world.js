@@ -22,7 +22,7 @@ function generateTerrainMap(island = 1) {
     for (let col = 0; col < columns; col++) {
       let distance;
 
-      if (island === 1) {
+      if (island === 1 || island === 3) {
         const normalizedX = (col - centerX) / islandRadiusX;
         const normalizedY = (row - centerY) / islandRadiusY;
 

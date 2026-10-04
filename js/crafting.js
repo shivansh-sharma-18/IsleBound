@@ -20,11 +20,14 @@ function getBoatRecipe() {
 }
 
 function canCraft(recipe) {
+  if (!recipe) {
+    return false;
+  }
   return inventory.wood >= recipe.wood && inventory.stone >= recipe.stone;
 }
 
 function craft(recipe) {
-  if (!canCraft(recipe)) {
+  if (!recipe || !canCraft(recipe)) {
     return false;
   }
 

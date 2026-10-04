@@ -1,3 +1,5 @@
+import { getCurrentIsland } from "./islandManager.js";
+
 const boatImage = new Image();
 boatImage.src = "./assets/items/boat.png";
 
@@ -20,7 +22,7 @@ function resetBoat() {
 }
 
 function isNearBoat(player) {
-  if (!boat.crafted) return false;
+  if (getCurrentIsland() === 3 || !boat.crafted) return false;
 
   const boatCenterX = boat.x + boat.width / 2;
   const boatCenterY = boat.y + boat.height / 2;
@@ -36,6 +38,8 @@ function isNearBoat(player) {
 }
 
 function drawBoat(ctx, camera) {
+  if (getCurrentIsland() === 3) return;
+
   const screenX = boat.x - camera.x + boat.width / 2;
   const screenY = boat.y - camera.y + boat.height / 2;
 

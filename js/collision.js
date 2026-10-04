@@ -62,7 +62,6 @@ function isTooCloseToObstacle(x, y, width, height, padding = 30) {
 }
 
 function isWalkable(x, y, width, height) {
-  // terrain collsion check
   const left = Math.floor(x / TILE_SIZE);
   const right = Math.floor((x + width - 1) / TILE_SIZE);
 
@@ -79,7 +78,6 @@ function isWalkable(x, y, width, height) {
     }
   }
 
-  // tree collision check
   for (const tree of trees) {
     const collisionX = tree.x + (tree.width - tree.collisionWidth) / 2;
 
@@ -101,7 +99,6 @@ function isWalkable(x, y, width, height) {
     }
   }
 
-  // rock collision check
   for (const rock of rocks) {
     const collisionX =
         rock.x + (rock.width - rock.collisionWidth) / 2;

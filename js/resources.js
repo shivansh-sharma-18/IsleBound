@@ -85,8 +85,8 @@ const RESOURCE_COUNTS = {
   },
 
   3: {
-    wood: 25,
-    stone: 15,
+    wood: 0,
+    stone: 0,
   },
 };
 

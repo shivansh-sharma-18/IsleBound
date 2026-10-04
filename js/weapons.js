@@ -10,6 +10,7 @@ function shoot(player, targetX, targetY) {
   const angle = Math.atan2(targetY - playerCenterY, targetX - playerCenterX);
 
   const bulletSpeed = 700;
+  const damage = player.weapon === "machineGun" ? 30 : 25;
 
   bullets.push({
     x: playerCenterX,
@@ -19,6 +20,7 @@ function shoot(player, targetX, targetY) {
     velocityX: Math.cos(angle) * bulletSpeed,
     velocityY: Math.sin(angle) * bulletSpeed,
     life: 2,
+    damage,
   });
 
   recordShotFired();

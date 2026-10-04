@@ -1,7 +1,13 @@
 import { canvas, ctx } from "./canvas.js";
 import { drawTerrain } from "./terrain.js";
 import { camera, updateCamera } from "./camera.js";
-import { player, playerImage, playerGunImage, resetPlayer } from "./player.js";
+import {
+  player,
+  playerImage,
+  playerGunImage,
+  playerMachineGunImage,
+  resetPlayer,
+} from "./player.js";
 import { mouse, keys } from "./input.js";
 import { updatePlayerMovement } from "./movement.js";
 import { drawTrees, drawRocks } from "./obstacles.js";
@@ -18,6 +24,10 @@ import {
   damageEnemies,
   generateInitialEnemies,
   resetEnemies,
+  spawnBoss,
+  spawnReinforcementEnemy,
+  isBossAlive,
+  getIsland3RegularKills,
   getPlayerHitFlash,
 } from "./enemies.js";
 import {
@@ -34,6 +44,8 @@ import {
   islandCompleted,
   completeIsland,
   resetIslandCompletion,
+  triggerVictory,
+  isGameWon,
   drawIslandComplete,
 } from "./islandComplete.js";
 import {
@@ -52,6 +64,14 @@ import {
 let craftingOpen = false;
 let gamePaused = false;
 
+let bossCountdown = 45.0;
+let bossSpawned = false;
+let bossDefeated = false;
+let reinforcementTimer = 0;
+let machineGunUnlocked = false;
+let machineGunBannerTimer = 0;
+let victoryTransitionTimer = 0;
+
 function resetCurrentIsland() {
   resetPlayer();
   resetResources();
@@ -60,9 +80,23 @@ function resetCurrentIsland() {
   resetBoat();
   resetIslandCompletion();
   craftingOpen = false;
+  bossCountdown = 45.0;
+  bossSpawned = false;
+  bossDefeated = false;
+  reinforcementTimer = 0;
+  machineGunUnlocked = false;
+  machineGunBannerTimer = 0;
+  victoryTransitionTimer = 0;
 }
 
 function update(dt) {
+  if (isGameWon()) {
+    if (keys["r"]) {
+      location.reload();
+    }
+    return;
+  }
+
   if (islandCompleted) {
     if (keys["e"]) {
       if (!isFinalIsland()) {
@@ -107,6 +141,49 @@ function update(dt) {
   updatePlayerMovement(dt);
   updateResources(dt);
 
+  if (getCurrentIsland() === 3) {
+    if (!bossSpawned) {
+      bossCountdown -= dt;
+      if (bossCountdown <= 0) {
+        bossCountdown = 0;
+        bossSpawned = true;
+        spawnBoss(player);
+      }
+    } else if (!bossDefeated) {
+      if (isBossAlive()) {
+        reinforcementTimer += dt;
+        if (reinforcementTimer >= 4.0) {
+          reinforcementTimer = 0;
+          spawnReinforcementEnemy(player);
+        }
+      } else {
+        bossDefeated = true;
+        victoryTransitionTimer = 2.0;
+      }
+    }
+
+    if (!machineGunUnlocked) {
+      if (getIsland3RegularKills() >= 20) {
+        machineGunUnlocked = true;
+        player.weapon = "machineGun";
+        player.shootDelay = 0.08;
+        machineGunBannerTimer = 3.5;
+      }
+    }
+
+    if (machineGunBannerTimer > 0) {
+      machineGunBannerTimer -= dt;
+    }
+
+    if (bossDefeated && !isGameWon()) {
+      victoryTransitionTimer -= dt;
+      if (victoryTransitionTimer <= 0) {
+        recordIslandCompleted();
+        triggerVictory();
+      }
+    }
+  }
+
   if (keys["e"]) {
     if (isNearBoat(player)) {
       if (!islandCompleted) {
@@ -131,9 +208,8 @@ function update(dt) {
 
   if (keys["b"]) {
     if (craftingOpen) {
-      const crafted = craft(getBoatRecipe());
-
-      if (crafted) {
+      const recipe = getBoatRecipe();
+      if (recipe && craft(recipe)) {
         craftBoat();
       }
     }
@@ -158,9 +234,8 @@ function update(dt) {
       mouse.y <= buttonY + buttonHeight;
 
     if (clickedInsideButton) {
-      const crafted = craft(getBoatRecipe());
-
-      if (crafted) {
+      const recipe = getBoatRecipe();
+      if (recipe && craft(recipe)) {
         craftBoat();
       }
     }
@@ -208,7 +283,12 @@ function drawPlayer() {
   const screenX = player.x - camera.x;
   const screenY = player.y - camera.y;
 
-  const currentImage = player.weapon === "gun" ? playerGunImage : playerImage;
+  const currentImage =
+    player.weapon === "machineGun"
+      ? playerMachineGunImage
+      : player.weapon === "gun"
+        ? playerGunImage
+        : playerImage;
 
   if (currentImage.complete && currentImage.naturalWidth > 0) {
     const drawX = screenX - (player.spriteWidth - player.width) / 2;
@@ -335,7 +415,7 @@ function drawInteractionPrompt() {
 }
 
 function drawBoatInteractionPrompt() {
-  if (!isNearBoat(player)) {
+  if (getCurrentIsland() === 3 || !isNearBoat(player)) {
     return;
   }
 
@@ -378,11 +458,6 @@ function drawCraftingMenu() {
 
   const boatRecipe = getBoatRecipe();
 
-  const canCraftBoat =
-    boatRecipe &&
-    inventory.wood >= boatRecipe.wood &&
-    inventory.stone >= boatRecipe.stone;
-
   ctx.fillStyle = "rgba(0, 0, 0, 0.85)";
 
   ctx.fillRect(x, y, width, height);
@@ -396,6 +471,21 @@ function drawCraftingMenu() {
   ctx.textAlign = "center";
 
   ctx.fillText("Crafting", canvas.width / 2, y + 45);
+
+  if (!boatRecipe) {
+    ctx.font = "18px Arial";
+    ctx.fillText(
+      "No recipes available on this island.",
+      canvas.width / 2,
+      y + 130,
+    );
+    ctx.textAlign = "left";
+    return;
+  }
+
+  const canCraftBoat =
+    inventory.wood >= boatRecipe.wood &&
+    inventory.stone >= boatRecipe.stone;
 
   ctx.font = "20px Arial";
 
@@ -432,6 +522,121 @@ function drawCraftingMenu() {
   );
 
   ctx.textAlign = "left";
+}
+
+function drawIsland3HUD() {
+  if (getCurrentIsland() !== 3) return;
+
+  if (!bossSpawned) {
+    const bannerWidth = 240;
+    const bannerHeight = 36;
+    const bannerX = (canvas.width - bannerWidth) / 2;
+    const bannerY = 20;
+
+    ctx.fillStyle = "rgba(0, 0, 0, 0.75)";
+    ctx.fillRect(bannerX, bannerY, bannerWidth, bannerHeight);
+
+    ctx.strokeStyle = "#e74c3c";
+    ctx.lineWidth = 2;
+    ctx.strokeRect(bannerX, bannerY, bannerWidth, bannerHeight);
+
+    ctx.fillStyle = "#f39c12";
+    ctx.font = "bold 16px Arial";
+    ctx.textAlign = "center";
+    ctx.fillText(
+      `BOSS ARRIVAL: ${Math.ceil(bossCountdown)}s`,
+      canvas.width / 2,
+      bannerY + 24,
+    );
+    ctx.textAlign = "left";
+  } else if (isBossAlive()) {
+    const bannerWidth = 280;
+    const bannerHeight = 36;
+    const bannerX = (canvas.width - bannerWidth) / 2;
+    const bannerY = 20;
+
+    ctx.fillStyle = "rgba(0, 0, 0, 0.75)";
+    ctx.fillRect(bannerX, bannerY, bannerWidth, bannerHeight);
+
+    ctx.strokeStyle = "#e74c3c";
+    ctx.lineWidth = 2;
+    ctx.strokeRect(bannerX, bannerY, bannerWidth, bannerHeight);
+
+    ctx.fillStyle = "#e74c3c";
+    ctx.font = "bold 16px Arial";
+    ctx.textAlign = "center";
+    ctx.fillText(
+      "☠ BOSS FIGHT IN PROGRESS ☠",
+      canvas.width / 2,
+      bannerY + 24,
+    );
+    ctx.textAlign = "left";
+  }
+
+  const killBoxWidth = 200;
+  const killBoxHeight = 36;
+  const killBoxX = canvas.width - killBoxWidth - 20;
+  const killBoxY = 20;
+
+  ctx.fillStyle = "rgba(0, 0, 0, 0.6)";
+  ctx.fillRect(killBoxX, killBoxY, killBoxWidth, killBoxHeight);
+
+  ctx.font = "14px Arial";
+  const kills = Math.min(20, getIsland3RegularKills());
+  if (machineGunUnlocked) {
+    ctx.fillStyle = "#2ecc71";
+    ctx.fillText("Kills: 20/20 (MG Ready!)", killBoxX + 15, killBoxY + 23);
+  } else {
+    ctx.fillStyle = "#ffffff";
+    ctx.fillText(`MG Unlock: ${kills}/20 Kills`, killBoxX + 15, killBoxY + 23);
+  }
+
+  const wepBoxWidth = 180;
+  const wepBoxHeight = 36;
+  const wepBoxX = 20;
+  const wepBoxY = 135;
+
+  ctx.fillStyle = "rgba(0, 0, 0, 0.6)";
+  ctx.fillRect(wepBoxX, wepBoxY, wepBoxWidth, wepBoxHeight);
+
+  if (player.weapon === "machineGun") {
+    ctx.fillStyle = "#f1c40f";
+    ctx.font = "bold 14px Arial";
+    ctx.fillText("WEAPON: MACHINE GUN", wepBoxX + 10, wepBoxY + 23);
+  } else {
+    ctx.fillStyle = "#ffffff";
+    ctx.font = "14px Arial";
+    ctx.fillText("WEAPON: PISTOL", wepBoxX + 10, wepBoxY + 23);
+  }
+
+  if (machineGunBannerTimer > 0) {
+    const popupWidth = 460;
+    const popupHeight = 80;
+    const px = (canvas.width - popupWidth) / 2;
+    const py = canvas.height / 2 - 160;
+
+    ctx.fillStyle = "rgba(0, 0, 0, 0.85)";
+    ctx.fillRect(px, py, popupWidth, popupHeight);
+
+    ctx.strokeStyle = "#f1c40f";
+    ctx.lineWidth = 3;
+    ctx.strokeRect(px, py, popupWidth, popupHeight);
+
+    ctx.fillStyle = "#f1c40f";
+    ctx.font = "bold 26px Arial";
+    ctx.textAlign = "center";
+    ctx.fillText("★ MACHINE GUN UNLOCKED! ★", canvas.width / 2, py + 34);
+
+    ctx.fillStyle = "#ffffff";
+    ctx.font = "16px Arial";
+    ctx.fillText(
+      "Rapid full-auto firepower equipped!",
+      canvas.width / 2,
+      py + 62,
+    );
+
+    ctx.textAlign = "left";
+  }
 }
 
 function drawPlayerHitEffect() {
@@ -487,6 +692,7 @@ function draw() {
   drawCraftingMenu();
   drawInteractionPrompt();
   drawBoatInteractionPrompt();
+  drawIsland3HUD();
   drawPlayerHitEffect();
   drawGameOver();
   drawIslandComplete(ctx, canvas);

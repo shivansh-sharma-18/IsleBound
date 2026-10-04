@@ -29,6 +29,9 @@ playerImage.src = "assets/player/rotation_pose_set/manBlue_stand.png";
 const playerGunImage = new Image();
 playerGunImage.src = "assets/player/rotation_pose_set/manBlue_gun.png";
 
+const playerMachineGunImage = new Image();
+playerMachineGunImage.src = "assets/player/rotation_pose_set/manBlue_machine.png";
+
 function resetPlayer() {
   player.x = 700;
   player.y = 700;
@@ -40,11 +43,14 @@ function resetPlayer() {
   player.aimAngle = 0;
 
   player.shootCooldown = 0;
+  player.shootDelay = 0.2;
+  player.weapon = "gun";
 }
 
 export {
   player,
   playerImage,
   playerGunImage,
+  playerMachineGunImage,
   resetPlayer,
 };
