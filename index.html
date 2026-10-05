@@ -50,6 +50,30 @@
       <button id="creditsBackButton">BACK</button>
     </div>
 
+    <div id="pauseScreen" class="menu-screen overlay-screen hidden">
+      <h2>PAUSED</h2>
+
+      <button id="resumeButton">RESUME</button>
+      <button id="pauseControlsButton">CONTROLS</button>
+      <button id="pauseMainMenuButton">MAIN MENU</button>
+    </div>
+
+    <div id="deathScreen" class="menu-screen overlay-screen hidden">
+      <h2 class="death-title">YOU DIED</h2>
+
+      <button id="restartButton">RESTART</button>
+      <button id="deathMainMenuButton">MAIN MENU</button>
+    </div>
+
+    <div id="victoryScreen" class="menu-screen overlay-screen hidden">
+      <h1 class="victory-title">YOU WIN!</h1>
+      <p class="victory-subtitle">YOU CONQUERED ISLEBOUND &amp; ESCAPED</p>
+
+      <div id="victoryStats" class="victory-stats"></div>
+
+      <button id="victoryMainMenuButton">MAIN MENU</button>
+    </div>
+
     <canvas id="gameCanvas"></canvas>
   </body>
 </html>

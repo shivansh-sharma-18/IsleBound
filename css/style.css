@@ -58,6 +58,62 @@ body {
   transform: scale(1.04);
 }
 
+.menu-screen button:active {
+  transform: scale(0.98);
+}
+
+.menu-screen.overlay-screen {
+  background: radial-gradient(circle at center, rgba(36, 52, 71, 0.92) 0%, rgba(16, 24, 32, 0.95) 50%, rgba(5, 8, 11, 0.97) 100%);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+}
+
+.death-title {
+  color: #e74c3c !important;
+  text-shadow: 0 0 25px rgba(231, 76, 60, 0.55);
+  font-size: 56px !important;
+  letter-spacing: 8px !important;
+}
+
+.victory-title {
+  color: #f1c40f !important;
+  text-shadow: 0 0 30px rgba(241, 196, 15, 0.5);
+  font-size: 64px !important;
+  letter-spacing: 8px !important;
+  margin: 0 0 10px !important;
+}
+
+.victory-subtitle {
+  font-size: 18px;
+  letter-spacing: 3px;
+  color: #ecf0f1;
+  margin: 0 0 25px;
+  text-transform: uppercase;
+  font-weight: bold;
+}
+
+.victory-stats {
+  margin-bottom: 30px;
+  text-align: center;
+  font-size: 17px;
+  line-height: 1.8;
+  color: #bdc3c7;
+  min-width: 380px;
+  max-width: 520px;
+  background: rgba(0, 0, 0, 0.4);
+  padding: 16px 24px;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 4px;
+}
+
+.victory-stats p {
+  margin: 4px 0;
+}
+
+.victory-stats strong {
+  color: #ffffff;
+}
+
 .controls-list {
   margin-bottom: 30px;
   text-align: left;

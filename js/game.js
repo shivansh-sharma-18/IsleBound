@@ -64,6 +64,22 @@ import {
 let craftingOpen = false;
 let gamePaused = false;
 
+function setPaused(paused) {
+  gamePaused = paused;
+  const pauseScreen = document.getElementById("pauseScreen");
+  if (pauseScreen) {
+    if (gamePaused) {
+      pauseScreen.classList.remove("hidden");
+    } else {
+      pauseScreen.classList.add("hidden");
+    }
+  }
+}
+
+function isPaused() {
+  return gamePaused;
+}
+
 let bossCountdown = 45.0;
 let bossSpawned = false;
 let bossDefeated = false;
@@ -87,11 +103,16 @@ function resetCurrentIsland() {
   machineGunUnlocked = false;
   machineGunBannerTimer = 0;
   victoryTransitionTimer = 0;
+  const deathScreen = document.getElementById("deathScreen");
+  if (deathScreen) {
+    deathScreen.classList.add("hidden");
+  }
 }
 
 function update(dt) {
   if (isGameWon()) {
     if (keys["r"]) {
+      sessionStorage.setItem("autoPlay", "true");
       location.reload();
     }
     return;
@@ -116,6 +137,7 @@ function update(dt) {
 
   if (player.gameOver) {
     if (keys["r"]) {
+      sessionStorage.setItem("autoPlay", "true");
       location.reload();
     }
 
@@ -128,7 +150,15 @@ function update(dt) {
   }
 
   if (keys["p"]) {
-    gamePaused = !gamePaused;
+    if (!player.gameOver && !isGameWon()) {
+      const controlsScreen = document.getElementById("controlsScreen");
+      if (controlsScreen && !controlsScreen.classList.contains("hidden")) {
+        controlsScreen.classList.add("hidden");
+        setPaused(false);
+      } else {
+        setPaused(!gamePaused);
+      }
+    }
     keys["p"] = false;
   }
 
@@ -253,6 +283,10 @@ function update(dt) {
     if (!player.gameOver) {
       player.gameOver = true;
       recordDeath();
+      const deathScreen = document.getElementById("deathScreen");
+      if (deathScreen) {
+        deathScreen.classList.remove("hidden");
+      }
     }
   }
 
@@ -335,22 +369,7 @@ function drawHealthBar() {
 }
 
 function drawGameOver() {
-  if (!player.gameOver) return;
-
-  ctx.fillStyle = "rgba(0, 0, 0, 0.65)";
-  ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-  ctx.fillStyle = "#fff";
-  ctx.font = "bold 60px Arial";
-  ctx.textAlign = "center";
-
-  ctx.fillText("GAME OVER", canvas.width / 2, canvas.height / 2);
-
-  ctx.font = "24px Arial";
-
-  ctx.fillText("Press R to restart", canvas.width / 2, canvas.height / 2 + 50);
-
-  ctx.textAlign = "left";
+  // Handled by DOM deathScreen
 }
 
 function drawInventory() {
@@ -652,23 +671,7 @@ function drawPlayerHitEffect() {
 }
 
 function drawPauseScreen() {
-  if (!gamePaused) return;
-
-  ctx.fillStyle = "rgba(0, 0, 0, 0.6)";
-
-  ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-  ctx.fillStyle = "#ffffff";
-  ctx.textAlign = "center";
-  ctx.font = "bold 52px Arial";
-
-  ctx.fillText("PAUSED", canvas.width / 2, canvas.height / 2 - 20);
-
-  ctx.font = "24px Arial";
-
-  ctx.fillText("Press P to Resume", canvas.width / 2, canvas.height / 2 + 30);
-
-  ctx.textAlign = "left";
+  // Handled by DOM pauseScreen
 }
 
 function draw() {
@@ -701,4 +704,4 @@ function draw() {
 
 generateInitialEnemies(player);
 
-export { update, draw };
+export { update, draw, setPaused, isPaused };

@@ -10,10 +10,29 @@ function completeIsland() {
 function resetIslandCompletion() {
   islandCompleted = false;
   gameWon = false;
+  const victoryScreen = document.getElementById("victoryScreen");
+  if (victoryScreen) {
+    victoryScreen.classList.add("hidden");
+  }
 }
 
 function triggerVictory() {
   gameWon = true;
+  const victoryScreen = document.getElementById("victoryScreen");
+  const victoryStats = document.getElementById("victoryStats");
+  if (victoryScreen) {
+    victoryScreen.classList.remove("hidden");
+  }
+  if (victoryStats) {
+    const stats = getStats();
+    if (stats) {
+      victoryStats.innerHTML = `
+        <p>Enemies Defeated: <strong>${stats.enemiesDefeated || 0}</strong> &nbsp;|&nbsp; Bosses Defeated: <strong>${stats.bossesDefeated || 0}</strong></p>
+        <p>Shots Fired: <strong>${stats.shotsFired || 0}</strong> &nbsp;|&nbsp; Damage Dealt: <strong>${stats.damageDealt || 0}</strong></p>
+        <p>Total Play Time: <strong>${formatTime(stats.totalPlayTime)}</strong></p>
+      `;
+    }
+  }
 }
 
 function isGameWon() {
@@ -29,53 +48,6 @@ function formatTime(seconds) {
 
 function drawIslandComplete(ctx, canvas) {
   if (gameWon) {
-    ctx.fillStyle = "rgba(0, 0, 0, 0.85)";
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-    ctx.textAlign = "center";
-
-    ctx.fillStyle = "#f1c40f";
-    ctx.font = "bold 56px Arial";
-    ctx.fillText("VICTORY!", canvas.width / 2, canvas.height / 2 - 120);
-
-    ctx.fillStyle = "#ffffff";
-    ctx.font = "bold 24px Arial";
-    ctx.fillText(
-      "YOU CONQUERED ISLEBOUND & ESCAPED!",
-      canvas.width / 2,
-      canvas.height / 2 - 70,
-    );
-
-    const stats = getStats();
-    if (stats) {
-      ctx.font = "18px Arial";
-      ctx.fillStyle = "#dddddd";
-      ctx.fillText(
-        `Enemies Defeated: ${stats.enemiesDefeated || 0}  |  Bosses Defeated: ${stats.bossesDefeated || 0}`,
-        canvas.width / 2,
-        canvas.height / 2 - 15,
-      );
-      ctx.fillText(
-        `Shots Fired: ${stats.shotsFired || 0}  |  Damage Dealt: ${stats.damageDealt || 0}`,
-        canvas.width / 2,
-        canvas.height / 2 + 15,
-      );
-      ctx.fillText(
-        `Total Play Time: ${formatTime(stats.totalPlayTime)}`,
-        canvas.width / 2,
-        canvas.height / 2 + 45,
-      );
-    }
-
-    ctx.fillStyle = "#2ecc71";
-    ctx.font = "bold 26px Arial";
-    ctx.fillText(
-      "Press R to Play Again",
-      canvas.width / 2,
-      canvas.height / 2 + 105,
-    );
-
-    ctx.textAlign = "left";
     return;
   }
 
