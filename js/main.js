@@ -1,6 +1,7 @@
 import { gameLoop } from "./gameLoop.js";
 import { update, draw, setPaused } from "./game.js";
-import { recordGameStarted } from "./stats.js";
+import { recordGameStarted, initStats } from "./stats.js";
+import { getCurrentUser, logout } from "./auth.js";
 
 const canvas = document.getElementById("gameCanvas");
 
@@ -29,10 +30,51 @@ const deathMainMenuButton = document.getElementById("deathMainMenuButton");
 
 const victoryMainMenuButton = document.getElementById("victoryMainMenuButton");
 
+const playerNameDisplay = document.getElementById("playerNameDisplay");
+const loginMenuButton = document.getElementById("loginMenuButton");
+const signupMenuButton = document.getElementById("signupMenuButton");
+const logoutMenuButton = document.getElementById("logoutMenuButton");
+
 let gameStarted = false;
 let controlsOpenedFrom = "mainMenu";
 
-function startGame() {
+function updateAuthUI() {
+  const user = getCurrentUser();
+  if (user && user.displayName) {
+    playerNameDisplay.textContent = user.displayName.toUpperCase();
+    loginMenuButton.classList.add("hidden");
+    signupMenuButton.classList.add("hidden");
+    logoutMenuButton.classList.remove("hidden");
+  } else {
+    playerNameDisplay.textContent = "GUEST";
+    loginMenuButton.classList.remove("hidden");
+    signupMenuButton.classList.remove("hidden");
+    logoutMenuButton.classList.add("hidden");
+  }
+}
+
+if (loginMenuButton) {
+  loginMenuButton.addEventListener("click", () => {
+    window.location.href = "auth.html?mode=login";
+  });
+}
+
+if (signupMenuButton) {
+  signupMenuButton.addEventListener("click", () => {
+    window.location.href = "auth.html?mode=signup";
+  });
+}
+
+if (logoutMenuButton) {
+  logoutMenuButton.addEventListener("click", async () => {
+    logout();
+    await initStats();
+    updateAuthUI();
+  });
+}
+
+async function startGame() {
+  await initStats();
   mainMenu.classList.add("hidden");
   canvas.style.display = "block";
 
@@ -119,6 +161,8 @@ if (victoryMainMenuButton) {
     window.location.href = "index.html";
   });
 }
+
+updateAuthUI();
 
 if (sessionStorage.getItem("autoPlay") === "true") {
   sessionStorage.removeItem("autoPlay");

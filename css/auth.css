@@ -1,0 +1,142 @@
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: radial-gradient(circle at center, #243447 0%, #101820 45%, #05080b 100%);
+  color: white;
+  font-family: Arial, sans-serif;
+  overflow-x: hidden;
+}
+
+.auth-container {
+  width: 100%;
+  max-width: 440px;
+  padding: 40px 20px;
+  text-align: center;
+}
+
+.auth-container h1 {
+  margin: 0 0 10px;
+  font-size: clamp(38px, 6vw, 64px);
+  letter-spacing: 8px;
+}
+
+.auth-container h2 {
+  margin: 0 0 35px;
+  font-size: 28px;
+  letter-spacing: 4px;
+  color: #ecf0f1;
+}
+
+.auth-card {
+  border: 2px solid rgba(255, 255, 255, 0.8);
+  background: rgba(0, 0, 0, 0.35);
+  padding: 30px 25px;
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+}
+
+.auth-form {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  text-align: left;
+}
+
+.auth-form label {
+  font-size: 13px;
+  font-weight: bold;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: #bdc3c7;
+}
+
+.auth-form input {
+  width: 100%;
+  padding: 13px 14px;
+  border: 2px solid rgba(255, 255, 255, 0.7);
+  background: rgba(0, 0, 0, 0.5);
+  color: white;
+  font-size: 16px;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.auth-form input:focus {
+  border-color: #3498db;
+}
+
+.auth-form input::placeholder {
+  color: #888888;
+}
+
+.auth-error {
+  padding: 10px 12px;
+  background: rgba(231, 76, 60, 0.25);
+  border: 1px solid #e74c3c;
+  color: #ff7675;
+  font-size: 14px;
+  text-align: center;
+  border-radius: 2px;
+}
+
+.auth-error:empty {
+  display: none !important;
+}
+
+.auth-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+button {
+  width: 100%;
+  padding: 14px 20px;
+  border: 2px solid white;
+  background: transparent;
+  color: white;
+  font-size: 18px;
+  font-weight: bold;
+  letter-spacing: 2px;
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s, transform 0.2s;
+}
+
+button:hover {
+  background: white;
+  color: #101820;
+  transform: scale(1.02);
+}
+
+button:active {
+  transform: scale(0.98);
+}
+
+.auth-switch-btn {
+  border: none !important;
+  background: transparent !important;
+  color: #bdc3c7 !important;
+  font-size: 13px !important;
+  letter-spacing: 1px !important;
+  text-decoration: underline;
+  cursor: pointer;
+  padding: 8px !important;
+}
+
+.auth-switch-btn:hover {
+  background: transparent !important;
+  color: #3498db !important;
+  transform: none !important;
+}
+
+.hidden {
+  display: none !important;
+}

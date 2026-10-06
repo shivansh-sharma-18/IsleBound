@@ -1,46 +1,75 @@
-const STORAGE_KEY = "isleboundProfile";
+import { getUserStats, saveUserStats } from "./db.js";
+import { getCurrentUser, defaultStatsTemplate } from "./auth.js";
 
 let unsavedPlayTime = 0;
 
+let activeStats = createDefaultStats("Guest");
+
+function createDefaultStats(playerName = "Guest") {
+    return {
+        ...defaultStatsTemplate,
+        playerName: playerName,
+    };
+}
+
+async function initStats() {
+    const user = getCurrentUser();
+    if (user && user.username) {
+        try {
+            const dbStats = await getUserStats(user.username);
+            if (dbStats) {
+                activeStats = {
+                    ...createDefaultStats(user.displayName || user.username),
+                    ...dbStats,
+                };
+                return activeStats;
+            }
+        } catch (error) {
+            console.error("Error loading stats from IndexedDB:", error);
+        }
+        activeStats = createDefaultStats(user.displayName || user.username);
+    } else {
+        activeStats = createDefaultStats("Guest");
+    }
+    return activeStats;
+}
+
+initStats();
+
 function getStats() {
-    const storedProfile = localStorage.getItem(STORAGE_KEY);
-    if (!storedProfile) {
-        return null;
-    }
-    try {
-        return JSON.parse(storedProfile);
-    } catch (error) {
-        console.error("Unable to read IsleBound statistics:", error);
-        return null;
-    }
+    return activeStats;
 }
 
 function saveStats(stats) {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(stats));
+    activeStats = { ...stats };
+    const user = getCurrentUser();
+    if (user && user.username) {
+        saveUserStats(user.username, activeStats).catch((err) => {
+            console.error("Failed to save stats to IndexedDB:", err);
+        });
+    }
 }
 
 function updateStats(changes) {
-    const stats = getStats();
-    if (!stats) {
-        return;
+    if (!activeStats) {
+        activeStats = createDefaultStats();
     }
     Object.keys(changes).forEach((key) => {
         if (typeof changes[key] === "number") {
-            stats[key] = (stats[key] || 0) + changes[key];
+            activeStats[key] = (activeStats[key] || 0) + changes[key];
         } else {
-            stats[key] = changes[key];
+            activeStats[key] = changes[key];
         }
     });
-    saveStats(stats);
+    saveStats(activeStats);
 }
 
 function setStat(key, value) {
-    const stats = getStats();
-    if (!stats) {
-        return;
+    if (!activeStats) {
+        activeStats = createDefaultStats();
     }
-    stats[key] = value;
-    saveStats(stats);
+    activeStats[key] = value;
+    saveStats(activeStats);
 }
 
 function recordGameStarted() {
@@ -107,19 +136,20 @@ function setCurrentIsland(islandNumber) {
 }
 
 function addPlayTime(seconds) {
-    const stats = getStats();
-    if (!stats) {
+    if (!activeStats) {
         return;
     }
     unsavedPlayTime += seconds;
     if (unsavedPlayTime >= 1) {
-        stats.totalPlayTime = (stats.totalPlayTime || 0) + unsavedPlayTime;
-        unsavedPlayTime = 0;
-        saveStats(stats);
+        const added = Math.floor(unsavedPlayTime);
+        activeStats.totalPlayTime = (activeStats.totalPlayTime || 0) + added;
+        unsavedPlayTime -= added;
+        saveStats(activeStats);
     }
 }
 
 export {
+    initStats,
     getStats,
     saveStats,
     updateStats,

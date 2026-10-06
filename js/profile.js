@@ -1,158 +1,112 @@
-const STORAGE_KEY = "isleboundProfile";
+import { getCurrentUser, logout } from "./auth.js";
+import { getUserStats } from "./db.js";
+import { initStats, getStats } from "./stats.js";
 
-const defaultProfile = {
-    playerName: "Player",
-    gamesPlayed: 0,
-    currentIsland: 1,
-    islandsCompleted: 0,
-    enemiesDefeated: 0,
-    piratesDefeated: 0,
-    skeletonsDefeated: 0,
-    bossesDefeated: 0,
-    shotsFired: 0,
-    damageDealt: 0,
-    woodCollected: 0,
-    stoneCollected: 0,
-    deaths: 0,
-    totalPlayTime: 0,
-};
-
-const profileFormSection = document.getElementById("profileFormSection");
+const badgePlayerName = document.getElementById("badgePlayerName");
+const guestNoticeSection = document.getElementById("guestNoticeSection");
 const statsSection = document.getElementById("statsSection");
-const profileForm = document.getElementById("profileForm");
-const playerNameInput = document.getElementById("playerName");
-const saveProfileButton = document.getElementById("saveProfileButton");
-const editProfileButton = document.getElementById("editProfileButton");
-const resetProfileButton = document.getElementById("resetProfileButton");
+const statsHeaderTitle = document.getElementById("statsHeaderTitle");
+
+const guestLoginButton = document.getElementById("guestLoginButton");
+const guestSignupButton = document.getElementById("guestSignupButton");
+
+const loginActionButton = document.getElementById("loginActionButton");
+const signupActionButton = document.getElementById("signupActionButton");
+const logoutActionButton = document.getElementById("logoutActionButton");
 const backToGameButton = document.getElementById("backToGameButton");
 
-function createProfile(playerName) {
-    const profile = {
-        ...defaultProfile,
-        playerName: playerName,
-    };
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(profile));
-    return profile;
-}
-
-function getProfile() {
-    const storedProfile = localStorage.getItem(STORAGE_KEY);
-    if (!storedProfile) {
-        return null;
-    }
-    try {
-        return JSON.parse(storedProfile);
-    } catch (error) {
-        console.error("Unable to read IsleBound profile:", error);
-        return null;
-    }
-}
-
-function updateProfile(updatedData) {
-    const currentProfile = getProfile();
-    if (!currentProfile) {
-        return null;
-    }
-    const updatedProfile = {
-        ...currentProfile,
-        ...updatedData,
-    };
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(updatedProfile));
-    return updatedProfile;
-}
-
-function deleteProfile() {
-    localStorage.removeItem(STORAGE_KEY);
-}
-
-function displayProfile(profile) {
-    document.getElementById("displayPlayerName").textContent = profile.playerName;
-    document.getElementById("gamesPlayed").textContent = profile.gamesPlayed;
-    document.getElementById("currentIsland").textContent = profile.currentIsland;
-    document.getElementById("islandsCompleted").textContent = profile.islandsCompleted;
-    document.getElementById("enemiesDefeated").textContent = profile.enemiesDefeated;
-    document.getElementById("piratesDefeated").textContent = profile.piratesDefeated;
-    document.getElementById("skeletonsDefeated").textContent = profile.skeletonsDefeated;
-    document.getElementById("bossesDefeated").textContent = profile.bossesDefeated;
-    document.getElementById("shotsFired").textContent = profile.shotsFired;
-    document.getElementById("damageDealt").textContent = profile.damageDealt;
-    document.getElementById("woodCollected").textContent = profile.woodCollected;
-    document.getElementById("stoneCollected").textContent = profile.stoneCollected;
-    document.getElementById("deaths").textContent = profile.deaths;
-    document.getElementById("totalPlayTime").textContent = formatPlayTime(profile.totalPlayTime);
-}
-
 function formatPlayTime(seconds) {
-    const totalSeconds = Math.max(0, Math.floor(seconds));
+    const totalSeconds = Math.max(0, Math.floor(seconds || 0));
     const minutes = Math.floor(totalSeconds / 60);
     const remainingSeconds = totalSeconds % 60;
     return `${minutes}:${String(remainingSeconds).padStart(2, "0")}`;
 }
 
-function showProfile() {
-    const profile = getProfile();
-    if (!profile) {
-        profileFormSection.classList.remove("hidden");
-        statsSection.classList.add("hidden");
-        editProfileButton.classList.add("hidden");
-        resetProfileButton.classList.add("hidden");
-        playerNameInput.value = "";
-        saveProfileButton.textContent = "CREATE PROFILE";
-        return;
-    }
-
-    profileFormSection.classList.add("hidden");
-    statsSection.classList.remove("hidden");
-    editProfileButton.classList.remove("hidden");
-    resetProfileButton.classList.remove("hidden");
-    displayProfile(profile);
+function displayStats(stats, displayName, isGuestUser) {
+    document.getElementById("displayPlayerName").textContent = displayName;
+    document.getElementById("displayAccountType").textContent = isGuestUser ? "Guest (Temporary)" : "Registered Profile";
+    document.getElementById("gamesPlayed").textContent = stats.gamesPlayed || 0;
+    document.getElementById("currentIsland").textContent = stats.currentIsland || 1;
+    document.getElementById("islandsCompleted").textContent = stats.islandsCompleted || 0;
+    document.getElementById("enemiesDefeated").textContent = stats.enemiesDefeated || 0;
+    document.getElementById("piratesDefeated").textContent = stats.piratesDefeated || 0;
+    document.getElementById("skeletonsDefeated").textContent = stats.skeletonsDefeated || 0;
+    document.getElementById("bossesDefeated").textContent = stats.bossesDefeated || 0;
+    document.getElementById("shotsFired").textContent = stats.shotsFired || 0;
+    document.getElementById("damageDealt").textContent = stats.damageDealt || 0;
+    document.getElementById("woodCollected").textContent = stats.woodCollected || 0;
+    document.getElementById("stoneCollected").textContent = stats.stoneCollected || 0;
+    document.getElementById("deaths").textContent = stats.deaths || 0;
+    document.getElementById("totalPlayTime").textContent = formatPlayTime(stats.totalPlayTime);
 }
 
-profileForm.addEventListener("submit", (event) => {
-    event.preventDefault();
-    const playerName = playerNameInput.value.trim();
-    if (!playerName) {
-        return;
-    }
+async function refreshProfileView() {
+    const currentUser = getCurrentUser();
 
-    const existingProfile = getProfile();
-    if (existingProfile) {
-        updateProfile({
-            playerName: playerName,
-        });
+    if (currentUser && currentUser.username) {
+        badgePlayerName.textContent = (currentUser.displayName || currentUser.username).toUpperCase();
+        guestNoticeSection.classList.add("hidden");
+        loginActionButton.classList.add("hidden");
+        signupActionButton.classList.add("hidden");
+        logoutActionButton.classList.remove("hidden");
+        statsHeaderTitle.textContent = "LIFETIME STATISTICS";
+
+        let stats = await getUserStats(currentUser.username);
+        if (!stats) {
+            stats = getStats();
+        }
+        displayStats(stats, currentUser.displayName || currentUser.username, false);
     } else {
-        createProfile(playerName);
+        badgePlayerName.textContent = "GUEST";
+        guestNoticeSection.classList.remove("hidden");
+        loginActionButton.classList.remove("hidden");
+        signupActionButton.classList.remove("hidden");
+        logoutActionButton.classList.add("hidden");
+        statsHeaderTitle.textContent = "SESSION STATISTICS (GUEST)";
+
+        const currentGuestStats = getStats();
+        displayStats(currentGuestStats, "Guest", true);
     }
+}
 
-    showProfile();
+if (guestLoginButton) {
+    guestLoginButton.addEventListener("click", () => {
+        window.location.href = "auth.html?mode=login";
+    });
+}
+
+if (guestSignupButton) {
+    guestSignupButton.addEventListener("click", () => {
+        window.location.href = "auth.html?mode=signup";
+    });
+}
+
+if (loginActionButton) {
+    loginActionButton.addEventListener("click", () => {
+        window.location.href = "auth.html?mode=login";
+    });
+}
+
+if (signupActionButton) {
+    signupActionButton.addEventListener("click", () => {
+        window.location.href = "auth.html?mode=signup";
+    });
+}
+
+if (logoutActionButton) {
+    logoutActionButton.addEventListener("click", async () => {
+        logout();
+        await initStats();
+        await refreshProfileView();
+    });
+}
+
+if (backToGameButton) {
+    backToGameButton.addEventListener("click", () => {
+        window.location.href = "index.html";
+    });
+}
+
+initStats().then(() => {
+    refreshProfileView();
 });
-
-editProfileButton.addEventListener("click", () => {
-    const profile = getProfile();
-    if (!profile) {
-        return;
-    }
-
-    profileFormSection.classList.remove("hidden");
-    statsSection.classList.add("hidden");
-    playerNameInput.value = profile.playerName;
-    saveProfileButton.textContent = "SAVE CHANGES";
-});
-
-resetProfileButton.addEventListener("click", () => {
-    const confirmed = confirm(
-        "Are you sure you want to reset your IsleBound profile and statistics?"
-    );
-    if (!confirmed) {
-        return;
-    }
-
-    deleteProfile();
-    showProfile();
-});
-
-backToGameButton.addEventListener("click", () => {
-    window.location.href = "index.html";
-});
-
-showProfile();

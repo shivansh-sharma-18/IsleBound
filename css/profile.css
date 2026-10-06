@@ -38,6 +38,18 @@ body {
     letter-spacing: 4px;
 }
 
+.user-badge {
+    margin-top: 15px;
+    font-size: 18px;
+    letter-spacing: 2px;
+    font-weight: bold;
+}
+
+.user-badge span {
+    color: #3498db;
+    text-shadow: 0 0 10px rgba(52, 152, 219, 0.5);
+}
+
 .profile-card {
     padding: 25px;
     margin-bottom: 25px;
@@ -52,35 +64,19 @@ body {
     letter-spacing: 2px;
 }
 
-#profileForm {
+.guest-desc {
+    text-align: center;
+    font-size: 16px;
+    line-height: 1.6;
+    color: #ecf0f1;
+    max-width: 650px;
+    margin: 0 auto 20px;
+}
+
+.guest-buttons {
     display: flex;
-    flex-direction: column;
-    gap: 12px;
-    max-width: 500px;
-    margin: 0 auto;
-}
-
-#profileForm label {
-    font-size: 18px;
-    font-weight: bold;
-}
-
-#profileForm input {
-    width: 100%;
-    padding: 13px;
-    border: 2px solid white;
-    background: rgba(0, 0, 0, 0.35);
-    color: white;
-    font-size: 17px;
-    outline: none;
-}
-
-#profileForm input::placeholder {
-    color: #bbbbbb;
-}
-
-#profileForm button {
-    margin-top: 5px;
+    justify-content: center;
+    gap: 15px;
 }
 
 .stats-grid {
@@ -135,8 +131,12 @@ button:hover {
     transform: scale(1.03);
 }
 
+button:active {
+    transform: scale(0.98);
+}
+
 .hidden {
-    display: none;
+    display: none !important;
 }
 
 @media (max-width: 700px) {
@@ -172,5 +172,9 @@ button:hover {
 
     .profile-actions button {
         width: 100%;
+    }
+
+    .guest-buttons {
+        flex-direction: column;
     }
 }

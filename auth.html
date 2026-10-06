@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>IsleBound - Authentication</title>
+  <link rel="stylesheet" href="./css/auth.css" />
+  <script type="module" src="./js/authPage.js"></script>
+</head>
+<body>
+
+  <div class="auth-container">
+    <h1>ISLEBOUND</h1>
+    <h2 id="authTitle">LOGIN</h2>
+
+    <div id="loginCard" class="auth-card">
+      <form id="loginForm" class="auth-form">
+        <label for="loginUsername">Username</label>
+        <input
+          type="text"
+          id="loginUsername"
+          placeholder="Enter username"
+          maxlength="20"
+          required
+          autocomplete="username"
+        />
+
+        <label for="loginPassword">Password</label>
+        <input
+          type="password"
+          id="loginPassword"
+          placeholder="Enter password"
+          required
+          autocomplete="current-password"
+        />
+
+        <div id="loginError" class="auth-error hidden"></div>
+
+        <div class="auth-actions">
+          <button type="submit" id="loginSubmitButton">LOG IN</button>
+          <button type="button" id="switchToSignupButton" class="auth-switch-btn">
+            DON'T HAVE AN ACCOUNT? SIGN UP
+          </button>
+          <button type="button" id="loginBackButton">BACK TO GAME</button>
+        </div>
+      </form>
+    </div>
+
+    <div id="signupCard" class="auth-card hidden">
+      <form id="signupForm" class="auth-form">
+        <label for="signupUsername">Username</label>
+        <input
+          type="text"
+          id="signupUsername"
+          placeholder="Choose username (3-20 chars)"
+          maxlength="20"
+          required
+          autocomplete="username"
+        />
+
+        <label for="signupPassword">Password</label>
+        <input
+          type="password"
+          id="signupPassword"
+          placeholder="Choose password (min 4 chars)"
+          required
+          autocomplete="new-password"
+        />
+
+        <label for="signupConfirmPassword">Confirm Password</label>
+        <input
+          type="password"
+          id="signupConfirmPassword"
+          placeholder="Confirm password"
+          required
+          autocomplete="new-password"
+        />
+
+        <div id="signupError" class="auth-error hidden"></div>
+
+        <div class="auth-actions">
+          <button type="submit" id="signupSubmitButton">CREATE ACCOUNT</button>
+          <button type="button" id="switchToLoginButton" class="auth-switch-btn">
+            ALREADY HAVE AN ACCOUNT? LOGIN
+          </button>
+          <button type="button" id="signupBackButton">BACK TO GAME</button>
+        </div>
+      </form>
+    </div>
+
+  </div>
+
+</body>
+</html>

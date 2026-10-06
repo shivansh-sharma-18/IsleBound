@@ -17,44 +17,36 @@
         <header class="profile-header">
             <h1>ISLEBOUND</h1>
             <h2>PLAYER PROFILE</h2>
+            <div id="activeUserBadge" class="user-badge">
+                <span id="badgePlayerName">GUEST</span>
+            </div>
         </header>
 
-        <!-- Profile creation / editing -->
-        <section id="profileFormSection" class="profile-card">
-
-            <h3>PLAYER PROFILE</h3>
-
-            <form id="profileForm">
-
-                <label for="playerName">Player Name</label>
-
-                <input
-                    type="text"
-                    id="playerName"
-                    placeholder="Enter player name"
-                    maxlength="20"
-                    required
-                >
-
-                <button type="submit" id="saveProfileButton">
-                    CREATE PROFILE
-                </button>
-
-            </form>
-
+        <section id="guestNoticeSection" class="profile-card hidden">
+            <h3>GUEST MODE</h3>
+            <p class="guest-desc">
+                You are currently playing in Guest mode. Statistics during Guest mode are temporary for your current session.
+            </p>
+            <div class="guest-buttons">
+                <button id="guestLoginButton">LOG IN</button>
+                <button id="guestSignupButton">SIGN UP</button>
+            </div>
         </section>
 
+        <section id="statsSection" class="profile-card">
 
-        <!-- Statistics -->
-        <section id="statsSection" class="profile-card hidden">
-
-            <h3>PLAYER STATISTICS</h3>
+            <h3 id="statsHeaderTitle">PLAYER STATISTICS</h3>
 
             <div class="stats-grid">
 
                 <div class="stat">
                     <span>Player Name</span>
                     <strong id="displayPlayerName">-</strong>
+                </div>
+
+                <div class="stat">
+                    <span>Account Type</span>
+                    <strong id="displayAccountType">Guest</strong>
                 </div>
 
                 <div class="stat">
@@ -126,16 +118,18 @@
 
         </section>
 
-
-        <!-- Actions -->
         <section class="profile-actions">
 
-            <button id="editProfileButton">
-                EDIT PROFILE
+            <button id="loginActionButton" class="hidden">
+                LOG IN
             </button>
 
-            <button id="resetProfileButton">
-                RESET PROFILE
+            <button id="signupActionButton" class="hidden">
+                SIGN UP
+            </button>
+
+            <button id="logoutActionButton" class="hidden">
+                LOG OUT
             </button>
 
             <button id="backToGameButton">
@@ -145,7 +139,6 @@
         </section>
 
     </main>
-
 
     <script type="module" src="./js/profile.js"></script>
 
