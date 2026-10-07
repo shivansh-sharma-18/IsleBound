@@ -1,5 +1,6 @@
 import { inventory } from "./inventory.js";
 import { getCurrentIsland } from "./islandManager.js";
+import { isBoatCrafted } from "./boat.js";
 
 const recipes = {
   boat: {
@@ -20,7 +21,7 @@ function getBoatRecipe() {
 }
 
 function canCraft(recipe) {
-  if (!recipe) {
+  if (!recipe || isBoatCrafted()) {
     return false;
   }
   return inventory.wood >= recipe.wood && inventory.stone >= recipe.stone;

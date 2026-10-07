@@ -36,6 +36,9 @@ function isValidTerrainPosition(x, y, width, height) {
   return true;
 }
 
+const CURRENT_OBSTACLE_PADDING = 45;
+const OBSTACLE_SPACING_PADDING = Math.round(CURRENT_OBSTACLE_PADDING * 1.3);
+
 function isPositionFree(x, y, width, height) {
   for (const tree of trees) {
     if (
@@ -48,7 +51,7 @@ function isPositionFree(x, y, width, height) {
         tree.y,
         tree.width,
         tree.height,
-        20,
+        OBSTACLE_SPACING_PADDING,
       )
     ) {
       return false;
@@ -66,7 +69,7 @@ function isPositionFree(x, y, width, height) {
         rock.y,
         rock.width,
         rock.height,
-        20,
+        OBSTACLE_SPACING_PADDING,
       )
     ) {
       return false;
@@ -145,8 +148,10 @@ function createRock() {
 }
 
 function generateObstacles() {
-  const treeCount = 8;
-  const rockCount = 5;
+  const BASE_TREE_COUNT = 8;
+  const BASE_ROCK_COUNT = 5;
+  const treeCount = Math.round(BASE_TREE_COUNT * 1.5);
+  const rockCount = Math.round(BASE_ROCK_COUNT * 1.5);
 
   for (let i = 0; i < treeCount; i++) {
     const tree = createTree();

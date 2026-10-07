@@ -1,6 +1,7 @@
 import { isWalkable, isTooCloseToObstacle } from "./collision.js";
 import { recordEnemyDefeated, recordDamageDealt } from "./stats.js";
 import { getCurrentIsland } from "./islandManager.js";
+import { world } from "./world.js";
 
 const ENEMY_TYPES = {
   pirate: {
@@ -9,7 +10,7 @@ const ENEMY_TYPES = {
     detectionRange: 500,
     attackRange: 55,
     attackCooldown: 1.1,
-    damage: 8,
+    damage: 12,
     radius: 15,
   },
   skeleton: {
@@ -18,17 +19,17 @@ const ENEMY_TYPES = {
     detectionRange: 550,
     attackRange: 50,
     attackCooldown: 0.8,
-    damage: 12,
+    damage: 18,
     radius: 16,
   },
   boss: {
-    hp: 600,
-    speed: 95,
-    detectionRange: 700,
+    hp: 4000,
+    speed: 380,
+    detectionRange: 800,
     attackRange: 80,
-    attackCooldown: 1.2,
-    damage: 25,
-    radius: 34,
+    attackCooldown: 1.0,
+    damage: 20,
+    radius: 300,
   },
 };
 
@@ -81,6 +82,11 @@ function makeEnemy(type, x, y) {
     return null;
   }
 
+  let detectionRange = base.detectionRange;
+  if (getCurrentIsland() === 3 && (type === "pirate" || type === "skeleton")) {
+    detectionRange = Math.round(base.detectionRange * 1.8);
+  }
+
   return {
     type,
     x,
@@ -90,7 +96,7 @@ function makeEnemy(type, x, y) {
     hp: base.hp,
     maxHp: base.hp,
     speed: base.speed,
-    detectionRange: base.detectionRange,
+    detectionRange,
     attackRange: base.attackRange,
     attackCooldown: base.attackCooldown,
     cdTimer: 0,
@@ -172,12 +178,14 @@ function attackPlayer(enemy, player) {
     playerCenterX - enemyCenterX,
   );
 
-  if ("vx" in player) {
-    player.vx = Math.cos(angle) * 260;
-  }
+  if (enemy.type !== "boss") {
+    if ("vx" in player) {
+      player.vx = Math.cos(angle) * 260;
+    }
 
-  if ("vy" in player) {
-    player.vy = Math.sin(angle) * 260;
+    if ("vy" in player) {
+      player.vy = Math.sin(angle) * 260;
+    }
   }
 
   if ("invulnTimer" in player) {
@@ -312,7 +320,13 @@ function updateEnemies(dt, player) {
 }
 
 function spawnBoss(player) {
-  spawnEnemy(player, "boss");
+  const x = world.width / 2 - ENEMY_WIDTH / 2;
+  const y = world.height / 2 - ENEMY_HEIGHT / 2;
+
+  const enemy = makeEnemy("boss", x, y);
+  if (enemy) {
+    enemies.push(enemy);
+  }
 }
 
 function spawnReinforcementEnemy(player) {
@@ -458,8 +472,8 @@ function drawEnemy(ctx, enemy, camera) {
   let drawHeight = 70;
 
   if (enemy.type === "boss") {
-    drawWidth = 110;
-    drawHeight = 110;
+    drawWidth = 160;
+    drawHeight = 160;
   }
 
   const animation = getAttackAnimation(enemy);
@@ -488,7 +502,7 @@ function drawEnemy(ctx, enemy, camera) {
   ctx.restore();
 
   if (enemy.type === "boss" && enemy.alive) {
-    const barWidth = 110;
+    const barWidth = 160;
     const barHeight = 8;
     const barX = screenX - barWidth / 2;
     const barY = screenY - drawHeight / 2 - 14;

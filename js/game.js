@@ -38,8 +38,8 @@ import {
   resetResources,
 } from "./resources.js";
 import { inventory, addResource, resetInventory } from "./inventory.js";
-import { getBoatRecipe, craft } from "./crafting.js";
-import { craftBoat, drawBoat, isNearBoat, resetBoat } from "./boat.js";
+import { getBoatRecipe, canCraft, craft } from "./crafting.js";
+import { craftBoat, drawBoat, isNearBoat, resetBoat, isBoatCrafted } from "./boat.js";
 import {
   islandCompleted,
   completeIsland,
@@ -502,9 +502,8 @@ function drawCraftingMenu() {
     return;
   }
 
-  const canCraftBoat =
-    inventory.wood >= boatRecipe.wood &&
-    inventory.stone >= boatRecipe.stone;
+  const alreadyCrafted = isBoatCrafted();
+  const canCraftBoat = canCraft(boatRecipe);
 
   ctx.font = "20px Arial";
 
@@ -534,8 +533,15 @@ function drawCraftingMenu() {
   ctx.fillStyle = "#ffffff";
   ctx.font = "16px Arial";
 
+  let buttonText = "Not Enough Resources";
+  if (alreadyCrafted) {
+    buttonText = "Already Crafted";
+  } else if (canCraftBoat) {
+    buttonText = "Craft Boat";
+  }
+
   ctx.fillText(
-    canCraftBoat ? "Craft Boat" : "Not Enough Resources",
+    buttonText,
     canvas.width / 2,
     buttonY + 28,
   );

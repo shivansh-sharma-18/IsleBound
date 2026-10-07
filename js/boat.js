@@ -11,14 +11,28 @@ const boat = {
   crafted: false,
 };
 
+const boatCraftedByIsland = {
+  1: false,
+  2: false,
+};
+
 const BOAT_INTERACTION_RANGE = 100;
 
+function isBoatCrafted(island = getCurrentIsland()) {
+  return !!boatCraftedByIsland[island];
+}
+
 function craftBoat() {
+  const island = getCurrentIsland();
+  if (island === 1 || island === 2) {
+    boatCraftedByIsland[island] = true;
+  }
   boat.crafted = true;
 }
 
 function resetBoat() {
-  boat.crafted = false;
+  const island = getCurrentIsland();
+  boat.crafted = isBoatCrafted(island);
 }
 
 function isNearBoat(player) {
@@ -75,4 +89,4 @@ function drawBoat(ctx, camera) {
   ctx.restore();
 }
 
-export { boat, craftBoat, resetBoat, drawBoat, isNearBoat };
+export { boat, craftBoat, resetBoat, drawBoat, isNearBoat, isBoatCrafted };
