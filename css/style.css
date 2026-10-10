@@ -1,12 +1,18 @@
 body {
   margin: 0;
-  overflow: hidden;
+  overflow-x: hidden;
+  overflow-y: auto;
   background: #000;
   font-family: Arial, sans-serif;
 }
 
 #gameCanvas {
   display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
 }
 
 .menu-screen {
@@ -15,10 +21,24 @@ body {
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
+  justify-content: safe center;
+  overflow-y: auto;
+  overflow-x: hidden;
+  box-sizing: border-box;
+  padding: 20px 24px;
   background: radial-gradient(circle at center, #243447 0%, #101820 45%, #05080b 100%);
   color: white;
   z-index: 10;
+}
+
+.menu-screen::before,
+.menu-screen::after {
+  content: "";
+  display: block;
+  flex: 0 1 auto;
+  height: 0;
+  min-height: 0;
+  margin: auto;
 }
 
 .top-bar {
@@ -33,7 +53,7 @@ body {
 }
 
 .top-hud-left {
-  font-size: 18px;
+  font-size: clamp(14px, 1.8vw, 18px);
   font-weight: bold;
   letter-spacing: 2px;
 }
@@ -45,43 +65,48 @@ body {
 
 .top-hud-right {
   display: flex;
-  gap: 10px;
+  gap: clamp(6px, 1vw, 10px);
 }
 
 .hud-btn {
   width: auto !important;
   margin: 0 !important;
-  padding: 8px 18px !important;
-  font-size: 14px !important;
+  padding: clamp(6px, 1vh, 8px) clamp(12px, 1.5vw, 18px) !important;
+  font-size: clamp(12px, 1.3vw, 14px) !important;
   letter-spacing: 1.5px !important;
   border: 1.5px solid white !important;
 }
 
 .menu-screen h1 {
-  margin: 0 0 60px;
-  font-size: 72px;
-  letter-spacing: 8px;
+  margin: clamp(16px, 3.5vh, 40px) 0 clamp(12px, 2.5vh, 30px);
+  font-size: clamp(36px, 6vw, 72px);
+  letter-spacing: clamp(4px, 1vw, 8px);
   text-align: center;
+  max-width: 95vw;
 }
 
 .menu-screen h2 {
-  margin: 0 0 40px;
-  font-size: 48px;
-  letter-spacing: 5px;
+  margin: 0 0 clamp(16px, 3.5vh, 40px);
+  font-size: clamp(28px, 4.5vw, 48px);
+  letter-spacing: clamp(3px, 0.8vw, 5px);
+  text-align: center;
+  max-width: 95vw;
 }
 
 .menu-screen button {
-  width: 260px;
-  margin: 8px;
-  padding: 15px 20px;
+  width: min(260px, 90vw);
+  max-width: 100%;
+  margin: clamp(4px, 1vh, 8px);
+  padding: clamp(10px, 1.4vh, 15px) 20px;
   border: 2px solid white;
   background: transparent;
   color: white;
-  font-size: 20px;
+  font-size: clamp(16px, 1.8vh, 20px);
   font-weight: bold;
   letter-spacing: 2px;
   cursor: pointer;
   transition: background 0.2s, color 0.2s, transform 0.2s;
+  box-sizing: border-box;
 }
 
 .menu-screen button:hover {
@@ -103,37 +128,39 @@ body {
 .death-title {
   color: #e74c3c !important;
   text-shadow: 0 0 25px rgba(231, 76, 60, 0.55);
-  font-size: 56px !important;
-  letter-spacing: 8px !important;
+  font-size: clamp(36px, 5.5vw, 56px) !important;
+  letter-spacing: clamp(4px, 1vw, 8px) !important;
 }
 
 .victory-title {
   color: #f1c40f !important;
   text-shadow: 0 0 30px rgba(241, 196, 15, 0.5);
-  font-size: 64px !important;
-  letter-spacing: 8px !important;
+  font-size: clamp(38px, 6vw, 64px) !important;
+  letter-spacing: clamp(4px, 1vw, 8px) !important;
   margin: 0 0 10px !important;
 }
 
 .victory-subtitle {
-  font-size: 18px;
-  letter-spacing: 3px;
+  font-size: clamp(13px, 1.8vw, 18px);
+  letter-spacing: clamp(2px, 0.4vw, 3px);
   color: #ecf0f1;
-  margin: 0 0 25px;
+  margin: 0 0 clamp(14px, 2vh, 25px);
   text-transform: uppercase;
   font-weight: bold;
+  text-align: center;
 }
 
 .victory-stats {
-  margin-bottom: 30px;
+  margin-bottom: clamp(15px, 2.5vh, 30px);
   text-align: center;
-  font-size: 17px;
+  font-size: clamp(13px, 1.5vh, 17px);
   line-height: 1.8;
   color: #bdc3c7;
-  min-width: 380px;
-  max-width: 520px;
+  width: min(520px, 92vw);
+  max-width: 100%;
+  box-sizing: border-box;
   background: rgba(0, 0, 0, 0.4);
-  padding: 16px 24px;
+  padding: clamp(10px, 1.5vh, 16px) clamp(14px, 2vw, 24px);
   border: 1px solid rgba(255, 255, 255, 0.15);
   border-radius: 4px;
 }
@@ -147,10 +174,11 @@ body {
 }
 
 .controls-list {
-  margin-bottom: 30px;
+  margin-bottom: clamp(15px, 2.5vh, 30px);
   text-align: left;
-  font-size: 20px;
+  font-size: clamp(15px, 1.8vh, 20px);
   line-height: 1.8;
+  max-width: min(450px, 92vw);
 }
 
 .controls-list p {
@@ -159,15 +187,16 @@ body {
 
 .controls-list span {
   display: inline-block;
-  width: 190px;
+  width: clamp(140px, 20vw, 190px);
   font-weight: bold;
 }
 
 .credits-content {
-  margin-bottom: 30px;
+  margin-bottom: clamp(15px, 2.5vh, 30px);
   text-align: center;
-  font-size: 20px;
+  font-size: clamp(15px, 1.8vh, 20px);
   line-height: 1.8;
+  max-width: min(500px, 92vw);
 }
 
 .credits-content p {
@@ -175,8 +204,8 @@ body {
 }
 
 .credits-content .game-title {
-  margin-bottom: 20px;
-  font-size: 28px;
+  margin-bottom: clamp(10px, 1.5vh, 20px);
+  font-size: clamp(20px, 2.5vw, 28px);
   font-weight: bold;
   letter-spacing: 4px;
 }
@@ -189,12 +218,36 @@ canvas {
   display: none !important;
 }
 
+@media (max-height: 720px), (max-width: 900px) {
+  #mainMenu {
+    justify-content: flex-start;
+    padding-top: 15px;
+    padding-bottom: 25px;
+  }
+
+  #mainMenu::before {
+    display: none;
+  }
+
+  .top-bar {
+    position: relative;
+    top: auto;
+    left: auto;
+    right: auto;
+    width: 100%;
+    max-width: 900px;
+    padding: 0 10px 10px;
+    box-sizing: border-box;
+  }
+}
+
 @media (max-width: 600px) {
   .top-bar {
-    top: 15px;
-    left: 15px;
-    right: 15px;
+    top: auto;
+    left: auto;
+    right: auto;
     flex-direction: column;
     gap: 10px;
+    text-align: center;
   }
 }

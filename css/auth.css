@@ -12,45 +12,50 @@ body {
   color: white;
   font-family: Arial, sans-serif;
   overflow-x: hidden;
+  overflow-y: auto;
+  box-sizing: border-box;
+  padding: 20px 15px;
 }
 
 .auth-container {
-  width: 100%;
-  max-width: 440px;
-  padding: 40px 20px;
+  width: min(440px, 92vw);
+  margin: auto;
+  padding: clamp(15px, 3vh, 40px) clamp(10px, 2vw, 20px);
   text-align: center;
+  box-sizing: border-box;
 }
 
 .auth-container h1 {
-  margin: 0 0 10px;
-  font-size: clamp(38px, 6vw, 64px);
-  letter-spacing: 8px;
+  margin: 0 0 clamp(6px, 1.2vh, 10px);
+  font-size: clamp(34px, 6vw, 64px);
+  letter-spacing: clamp(4px, 1vw, 8px);
 }
 
 .auth-container h2 {
-  margin: 0 0 35px;
-  font-size: 28px;
-  letter-spacing: 4px;
+  margin: 0 0 clamp(15px, 2.8vh, 35px);
+  font-size: clamp(20px, 3vw, 28px);
+  letter-spacing: clamp(2px, 0.5vw, 4px);
   color: #ecf0f1;
 }
 
 .auth-card {
   border: 2px solid rgba(255, 255, 255, 0.8);
   background: rgba(0, 0, 0, 0.35);
-  padding: 30px 25px;
+  padding: clamp(18px, 2.5vh, 30px) clamp(16px, 2.5vw, 25px);
   backdrop-filter: blur(6px);
   -webkit-backdrop-filter: blur(6px);
+  box-sizing: border-box;
 }
 
 .auth-form {
   display: flex;
   flex-direction: column;
-  gap: 14px;
+  gap: clamp(8px, 1.4vh, 14px);
   text-align: left;
 }
 
 .auth-form label {
-  font-size: 13px;
+  font-size: clamp(11px, 1.2vw, 13px);
   font-weight: bold;
   letter-spacing: 1.5px;
   text-transform: uppercase;
@@ -59,13 +64,14 @@ body {
 
 .auth-form input {
   width: 100%;
-  padding: 13px 14px;
+  padding: clamp(9px, 1.2vh, 13px) 14px;
   border: 2px solid rgba(255, 255, 255, 0.7);
   background: rgba(0, 0, 0, 0.5);
   color: white;
-  font-size: 16px;
+  font-size: clamp(14px, 1.5vh, 16px);
   outline: none;
   transition: border-color 0.2s;
+  box-sizing: border-box;
 }
 
 .auth-form input:focus {
@@ -93,21 +99,22 @@ body {
 .auth-actions {
   display: flex;
   flex-direction: column;
-  gap: 10px;
-  margin-top: 10px;
+  gap: clamp(6px, 1vh, 10px);
+  margin-top: clamp(6px, 1vh, 10px);
 }
 
 button {
   width: 100%;
-  padding: 14px 20px;
+  padding: clamp(10px, 1.3vh, 14px) 20px;
   border: 2px solid white;
   background: transparent;
   color: white;
-  font-size: 18px;
+  font-size: clamp(15px, 1.6vh, 18px);
   font-weight: bold;
   letter-spacing: 2px;
   cursor: pointer;
   transition: background 0.2s, color 0.2s, transform 0.2s;
+  box-sizing: border-box;
 }
 
 button:hover {

@@ -13,34 +13,36 @@ body {
         #101820 50%,
         #05080b 100%
     );
+    overflow-x: hidden;
+    overflow-y: auto;
 }
 
 .profile-page {
     width: min(1000px, 92%);
     margin: 0 auto;
-    padding: 40px 0 50px;
+    padding: clamp(20px, 4vh, 40px) 0 clamp(25px, 5vh, 50px);
 }
 
 .profile-header {
     text-align: center;
-    margin-bottom: 35px;
+    margin-bottom: clamp(18px, 3.5vh, 35px);
 }
 
 .profile-header h1 {
     margin: 0;
-    font-size: clamp(42px, 8vw, 72px);
-    letter-spacing: 8px;
+    font-size: clamp(38px, 6vw, 72px);
+    letter-spacing: clamp(4px, 1vw, 8px);
 }
 
 .profile-header h2 {
     margin: 10px 0 0;
-    font-size: clamp(22px, 4vw, 36px);
-    letter-spacing: 4px;
+    font-size: clamp(20px, 3.5vw, 36px);
+    letter-spacing: clamp(2px, 0.5vw, 4px);
 }
 
 .user-badge {
-    margin-top: 15px;
-    font-size: 18px;
+    margin-top: clamp(10px, 1.5vh, 15px);
+    font-size: clamp(14px, 1.6vw, 18px);
     letter-spacing: 2px;
     font-weight: bold;
 }
@@ -51,26 +53,27 @@ body {
 }
 
 .profile-card {
-    padding: 25px;
-    margin-bottom: 25px;
+    padding: clamp(16px, 2.5vh, 25px);
+    margin-bottom: clamp(16px, 2.5vh, 25px);
     border: 2px solid rgba(255, 255, 255, 0.8);
     background: rgba(0, 0, 0, 0.25);
+    box-sizing: border-box;
 }
 
 .profile-card h3 {
-    margin: 0 0 25px;
+    margin: 0 0 clamp(16px, 2.5vh, 25px);
     text-align: center;
-    font-size: 24px;
+    font-size: clamp(20px, 2.2vw, 24px);
     letter-spacing: 2px;
 }
 
 .guest-desc {
     text-align: center;
-    font-size: 16px;
+    font-size: clamp(14px, 1.5vw, 16px);
     line-height: 1.6;
     color: #ecf0f1;
     max-width: 650px;
-    margin: 0 auto 20px;
+    margin: 0 auto clamp(14px, 2vh, 20px);
 }
 
 .guest-buttons {
@@ -82,25 +85,26 @@ body {
 .stats-grid {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
-    gap: 15px;
+    gap: clamp(10px, 1.5vw, 15px);
 }
 
 .stat {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    gap: 20px;
-    padding: 15px;
+    gap: clamp(10px, 1.8vw, 20px);
+    padding: clamp(10px, 1.5vh, 15px);
     border: 1px solid rgba(255, 255, 255, 0.35);
     background: rgba(255, 255, 255, 0.05);
+    box-sizing: border-box;
 }
 
 .stat span {
-    font-size: 16px;
+    font-size: clamp(14px, 1.4vw, 16px);
 }
 
 .stat strong {
-    font-size: 18px;
+    font-size: clamp(15px, 1.6vw, 18px);
 }
 
 .profile-actions {
@@ -111,11 +115,11 @@ body {
 }
 
 button {
-    padding: 13px 22px;
+    padding: clamp(10px, 1.4vh, 13px) clamp(16px, 2vw, 22px);
     border: 2px solid white;
     background: transparent;
     color: white;
-    font-size: 16px;
+    font-size: clamp(14px, 1.5vw, 16px);
     font-weight: bold;
     letter-spacing: 1px;
     cursor: pointer;
@@ -123,6 +127,7 @@ button {
         background 0.2s,
         color 0.2s,
         transform 0.2s;
+    box-sizing: border-box;
 }
 
 button:hover {
@@ -139,9 +144,9 @@ button:active {
     display: none !important;
 }
 
-@media (max-width: 700px) {
+@media (max-width: 760px) {
     .profile-page {
-        padding-top: 25px;
+        padding-top: 20px;
     }
 
     .stats-grid {
@@ -149,11 +154,11 @@ button:active {
     }
 
     .profile-card {
-        padding: 18px;
+        padding: 16px;
     }
 
     .stat {
-        padding: 13px;
+        padding: 12px;
     }
 }
 
